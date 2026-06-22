@@ -1,4 +1,5 @@
 import re
+from tkinter import messagebox
 from config import CATEGORIES
 
 class TreeMixin:
@@ -25,13 +26,18 @@ class TreeMixin:
         # Clear existing Treeview items
         self.file_tree.delete(*self.file_tree.get_children())
         self.tree_item_map.clear()
-        self.tree_categories_map.clear()
-        self.tree_size_groups_map.clear()
+        
+        # Initialize folder nodes and stats
+        self.folder_nodes = {}
+        self.folder_stats = {}
         self.tree_reconstructed_node = None
         
         hide = self.hide_non_previewable.get()
         sort_opt = self.sort_var.get()
         cat_filter = self.selected_category_filter
+        
+        search_query = getattr(self, "search_var", None)
+        search_query_val = search_query.get().lower().strip() if search_query else ""
         
         filtered_files = []
         for f in self.virtual_files:
@@ -40,6 +46,8 @@ class TreeMixin:
             if hide:
                 if self.get_preview_status(f) != "Önizlenebildi":
                     continue
+            if search_query_val and search_query_val not in f["name"].lower():
+                continue
             filtered_files.append(f)
             
         def natural_sort_key(s):
@@ -72,13 +80,6 @@ class TreeMixin:
             elif sort_opt == "Boyut (Küçükten Büyüye)":
                 filtered_files.sort(key=lambda x: x["size"])
 
-        # Group files: Category -> Size Bracket -> Files list
-        groups = {}
-        for f in filtered_files:
-            cat = f["category"]
-            size_group = self.get_size_group_name(f["size"])
-            groups.setdefault(cat, {}).setdefault(size_group, []).append(f)
-            
         total_files = len(filtered_files)
         total_bytes = sum(f["size"] for f in filtered_files)
         total_size_str = self.format_size(total_bytes)
@@ -91,42 +92,57 @@ class TreeMixin:
             open=True
         )
         
-        # Insert Category nodes under root reconstructed node
-        for cat, size_groups in groups.items():
-            cat_total = sum(len(lst) for lst in size_groups.values())
-            cat_bytes = sum(sum(x["size"] for x in lst) for lst in size_groups.values())
-            cat_size_str = self.format_size(cat_bytes)
+        # Calculate stats for all folders and their ancestors
+        for f in filtered_files:
+            if f.get("custom_path"):
+                path_components = [p.strip() for p in re.split(r'[/\\]', f["custom_path"]) if p.strip()]
+            else:
+                path_components = [f["category"], self.get_size_group_name(f["size"])]
             
-            cat_node = self.file_tree.insert(
-                self.tree_reconstructed_node, "end", 
-                text=f"📁 {cat} ({cat_total})", 
-                values=("-", "-", "-", "Klasör", cat_size_str, "-"),
+            for i in range(1, len(path_components) + 1):
+                ancestor = tuple(path_components[:i])
+                stats = self.folder_stats.setdefault(ancestor, {"count": 0, "size": 0})
+                stats["count"] += 1
+                stats["size"] += f["size"]
+                
+        def get_or_create_folder_node(path_tuple):
+            if not path_tuple:
+                return self.tree_reconstructed_node
+            if path_tuple in self.folder_nodes:
+                return self.folder_nodes[path_tuple]
+            
+            parent_tuple = path_tuple[:-1]
+            parent_node = get_or_create_folder_node(parent_tuple)
+            
+            folder_name = path_tuple[-1]
+            stats = self.folder_stats[path_tuple]
+            f_size_str = self.format_size(stats["size"])
+            node_id = self.file_tree.insert(
+                parent_node, "end",
+                text=f"📁 {folder_name} ({stats['count']})",
+                values=("-", "-", "-", "Klasör", f_size_str, "-"),
                 open=True
             )
-            self.tree_categories_map[cat] = cat_node
+            self.folder_nodes[path_tuple] = node_id
+            return node_id
+
+        # Insert files
+        for f in filtered_files:
+            if f.get("custom_path"):
+                path_components = [p.strip() for p in re.split(r'[/\\]', f["custom_path"]) if p.strip()]
+            else:
+                path_components = [f["category"], self.get_size_group_name(f["size"])]
+                
+            parent_node = get_or_create_folder_node(tuple(path_components))
+            size_str = self.format_size(f["size"])
             
-            for size_group, files_list in size_groups.items():
-                group_bytes = sum(x["size"] for x in files_list)
-                group_size_str = self.format_size(group_bytes)
-                
-                size_node = self.file_tree.insert(
-                    cat_node, "end", 
-                    text=f"📂 {size_group} ({len(files_list)})", 
-                    values=("-", "-", "-", "Klasör", group_size_str, "-"),
-                    open=True
-                )
-                self.tree_size_groups_map[(cat, size_group)] = size_node
-                
-                for f in files_list:
-                    size_str = self.format_size(f["size"])
-                    
-                    file_node = self.file_tree.insert(
-                        size_node, 
-                        "end", 
-                        text=f["name"], 
-                        values=("Yüksek", "-", self.get_preview_status(f), f"{f['type_name']} Dosyası", size_str, f"Ofset {f['offset']}")
-                    )
-                    self.tree_item_map[file_node] = f
+            file_node = self.file_tree.insert(
+                parent_node, 
+                "end", 
+                text=f["name"], 
+                values=("Yüksek", "-", self.get_preview_status(f), f"{f['type_name']} Dosyası", size_str, f"Ofset {f['offset']}")
+            )
+            self.tree_item_map[file_node] = f
 
     def get_size_group_name(self, size_bytes):
         if size_bytes < 100 * 1024:
@@ -148,36 +164,39 @@ class TreeMixin:
             if self.get_preview_status(f) != "Önizlenebildi":
                 return
                 
-        cat = f["category"]
-        size_group = self.get_size_group_name(f["size"])
-        
-        # Filter files list in memory to recalculate size/counts
-        filtered_files = []
-        for x in self.virtual_files:
-            if cat_filter != "All" and x["category"] != cat_filter:
-                continue
-            if hide:
+        if f.get("custom_path"):
+            path_components = [p.strip() for p in re.split(r'[/\\]', f["custom_path"]) if p.strip()]
+        else:
+            path_components = [f["category"], self.get_size_group_name(f["size"])]
+            
+        if not hasattr(self, "folder_nodes") or self.folder_nodes is None:
+            self.folder_nodes = {}
+        if not hasattr(self, "folder_stats") or self.folder_stats is None:
+            self.folder_stats = {}
+            
+        if not self.tree_reconstructed_node:
+            self.folder_nodes.clear()
+            self.folder_stats.clear()
+            
+        if not hide:
+            if cat_filter == "All":
+                total_files = self.total_recovered_count
+                total_bytes = self.total_recovered_size
+            else:
+                total_files = self.category_counts.get(cat_filter, 0)
+                total_bytes = self.category_sizes.get(cat_filter, 0)
+            total_size_str = self.format_size(total_bytes)
+        else:
+            filtered_files = []
+            for x in self.virtual_files:
+                if cat_filter != "All" and x["category"] != cat_filter:
+                    continue
                 if self.get_preview_status(x) != "Önizlenebildi":
                     continue
-            filtered_files.append(x)
-            
-        total_files = len(filtered_files)
-        total_bytes = sum(x["size"] for x in filtered_files)
-        total_size_str = self.format_size(total_bytes)
-        
-        # Save current open states before any insert/update
-        root_was_open = True
-        if self.tree_reconstructed_node:
-            root_was_open = self.file_tree.item(self.tree_reconstructed_node, "open")
-            
-        cat_was_open = True
-        if cat in self.tree_categories_map:
-            cat_was_open = self.file_tree.item(self.tree_categories_map[cat], "open")
-            
-        map_key = (cat, size_group)
-        group_was_open = True
-        if map_key in self.tree_size_groups_map:
-            group_was_open = self.file_tree.item(self.tree_size_groups_map[map_key], "open")
+                filtered_files.append(x)
+            total_files = len(filtered_files)
+            total_bytes = sum(x["size"] for x in filtered_files)
+            total_size_str = self.format_size(total_bytes)
             
         # 0. Check or create Root Reconstructed Node
         if not self.tree_reconstructed_node:
@@ -193,69 +212,82 @@ class TreeMixin:
                 text=f"Yeniden inşa edildi ({total_files}) - {total_size_str}",
                 values=("-", "-", "-", "Klasör", total_size_str, "-")
             )
-        
-        # 1. Category Node
-        cat_files = [x for x in filtered_files if x["category"] == cat]
-        cat_total = len(cat_files)
-        cat_bytes = sum(x["size"] for x in cat_files)
-        cat_size_str = self.format_size(cat_bytes)
-        
-        if cat not in self.tree_categories_map:
-            cat_node = self.file_tree.insert(
-                self.tree_reconstructed_node, "end", 
-                text=f"📁 {cat} ({cat_total})", 
-                values=("-", "-", "-", "Klasör", cat_size_str, "-"),
-                open=True
-            )
-            self.tree_categories_map[cat] = cat_node
-        else:
-            cat_node = self.tree_categories_map[cat]
-            self.file_tree.item(
-                cat_node, 
-                text=f"📁 {cat} ({cat_total})",
-                values=("-", "-", "-", "Klasör", cat_size_str, "-")
-            )
             
-        # 2. Size Group Node
-        group_files = [x for x in cat_files if self.get_size_group_name(x["size"]) == size_group]
-        group_total = len(group_files)
-        group_bytes = sum(x["size"] for x in group_files)
-        group_size_str = self.format_size(group_bytes)
-        
-        if map_key not in self.tree_size_groups_map:
-            size_node = self.file_tree.insert(
-                cat_node, "end", 
-                text=f"📂 {size_group} ({group_total})", 
-                values=("-", "-", "-", "Klasör", group_size_str, "-"),
-                open=True
-            )
-            self.tree_size_groups_map[map_key] = size_node
-        else:
-            size_node = self.tree_size_groups_map[map_key]
-            self.file_tree.item(
-                size_node, 
-                text=f"📂 {size_group} ({group_total})",
-                values=("-", "-", "-", "Klasör", group_size_str, "-")
-            )
+        # Recursive update/create folder nodes and stats
+        def get_or_create_folder_node(path_tuple):
+            if not path_tuple:
+                return self.tree_reconstructed_node
             
+            parent_tuple = path_tuple[:-1]
+            parent_node = get_or_create_folder_node(parent_tuple)
+            
+            stats = self.folder_stats.setdefault(path_tuple, {"count": 0, "size": 0})
+            stats["count"] += 1
+            stats["size"] += f["size"]
+            
+            folder_name = path_tuple[-1]
+            f_size_str = self.format_size(stats["size"])
+            
+            if path_tuple not in self.folder_nodes:
+                node_id = self.file_tree.insert(
+                    parent_node, "end",
+                    text=f"📁 {folder_name} ({stats['count']})",
+                    values=("-", "-", "-", "Klasör", f_size_str, "-"),
+                    open=True
+                )
+                self.folder_nodes[path_tuple] = node_id
+            else:
+                node_id = self.folder_nodes[path_tuple]
+                self.file_tree.item(
+                    node_id,
+                    text=f"📁 {folder_name} ({stats['count']})",
+                    values=("-", "-", "-", "Klasör", f_size_str, "-")
+                )
+            return node_id
+            
+        parent_node = get_or_create_folder_node(tuple(path_components))
+        
         # 3. File Node
         size_str = self.format_size(f["size"])
         
         file_node = self.file_tree.insert(
-            size_node, 
+            parent_node, 
             "end", 
             text=f["name"], 
             values=("Yüksek", "-", self.get_preview_status(f), f"{f['type_name']} Dosyası", size_str, f"Ofset {f['offset']}")
         )
         self.tree_item_map[file_node] = f
+
+    def move_selected_to_folder(self):
+        selected_files = self.get_selected_virtual_files()
+        if not selected_files:
+            messagebox.showwarning("Uyarı", "Lütfen taşımak istediğiniz dosya veya klasörleri seçin!")
+            return
+            
+        from tkinter import simpledialog
+        folder_path = simpledialog.askstring(
+            "Klasöre Taşı",
+            "Taşınacak hedef klasör adını girin (Örn: Resimler/Tatil):\n(Boş bırakırsanız varsayılan kategoriye geri taşınır)",
+            parent=self
+        )
+        if folder_path is None:  # User canceled
+            return
+            
+        folder_path = folder_path.strip()
         
-        # Restore open/collapse states if any parent was collapsed
-        if not root_was_open:
-            self.file_tree.item(self.tree_reconstructed_node, open=False)
-        if not cat_was_open:
-            self.file_tree.item(cat_node, open=False)
-        if not group_was_open:
-            self.file_tree.item(size_node, open=False)
+        # Update custom_path for each selected virtual file
+        for f in selected_files:
+            if folder_path == "":
+                if "custom_path" in f:
+                    del f["custom_path"]
+            else:
+                f["custom_path"] = folder_path
+                
+        # Re-render the treeview to show new structure
+        self.update_file_listbox_view()
+        
+        # Save state so that it persists
+        self.save_scan_state()
 
     def sort_by_column(self, col):
         # Toggle or set sort direction

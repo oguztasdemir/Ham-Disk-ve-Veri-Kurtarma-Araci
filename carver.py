@@ -1,10 +1,12 @@
 # carver.py
 import time
 import os
+import queue
+import threading
 from config import FILE_SIGNATURES
 
 def read_raw_bytes_shared(disk, offset, size, disk_lock):
-    """Thread-safe raw sector aligned read from an open disk handle."""
+    """Thread-safe raw sector aligned read from an open disk handle or a path string."""
     sector_size = 512
     start_sector = offset // sector_size
     sector_offset = offset % sector_size
@@ -12,13 +14,27 @@ def read_raw_bytes_shared(disk, offset, size, disk_lock):
     end_byte = sector_offset + size
     sectors_to_read = (end_byte + sector_size - 1) // sector_size
     
+    if isinstance(disk, str):
+        with disk_lock:
+            try:
+                with open(disk, "rb", buffering=0) as f:
+                    f.seek(start_sector * sector_size)
+                    raw_data = f.read(sectors_to_read * sector_size)
+                return raw_data[sector_offset : sector_offset + size]
+            except Exception as e:
+                print(f"Hata disk okunurken (path): {e}")
+                return b""
+                
     with disk_lock:
-        prev_pos = disk.tell()
-        disk.seek(start_sector * sector_size)
-        raw_data = disk.read(sectors_to_read * sector_size)
-        disk.seek(prev_pos)
-        
-    return raw_data[sector_offset : sector_offset + size]
+        try:
+            prev_pos = disk.tell()
+            disk.seek(start_sector * sector_size)
+            raw_data = disk.read(sectors_to_read * sector_size)
+            disk.seek(prev_pos)
+            return raw_data[sector_offset : sector_offset + size]
+        except Exception as e:
+            print(f"Hata disk okunurken (handle): {e}")
+            return b""
 
 def extract_filename_from_bytes(raw_bytes, ext):
     """Attempts to parse a meaningful name from document/archive metadata headers."""
@@ -167,195 +183,363 @@ def find_footer_offset(disk, start_offset, footer_sig, disk_lock, max_search_siz
         pass
     return max_search_size  # Cap at max search size if not found
 
+def producer_read_segment_loop(disk, read_queue, app_instance, chunk_size, start_offset, end_offset, worker_lock):
+    current_offset = start_offset
+    with app_instance.segment_lock:
+        progress = app_instance.segment_progress.get(start_offset, 0)
+        current_offset += progress
+        
+    while app_instance.is_scanning:
+        if app_instance.scan_paused:
+            time.sleep(0.1)
+            continue
+            
+        if current_offset >= end_offset:
+            read_queue.put((None, None))
+            break
+            
+        try:
+            with worker_lock:
+                disk.seek(current_offset)
+                to_read = chunk_size
+                if current_offset + chunk_size > end_offset:
+                    to_read = end_offset - current_offset
+                    if to_read <= 0:
+                        read_queue.put((None, None))
+                        break
+                        
+                chunk = disk.read(to_read)
+                actual_offset = current_offset
+                current_offset = disk.tell()
+                
+            if not chunk:
+                read_queue.put((None, None))
+                break
+                
+            read_queue.put((actual_offset, chunk))
+        except Exception as e:
+            read_queue.put(("error", str(e)))
+            break
+
 def scan_disk_worker(app_instance, drive_path, signatures):
-    """Worker function that runs in a background thread to scan the disk virtually."""
-    chunk_size = 8 * 1024 * 1024  # 8 MB scan step
-    file_count = len(app_instance.virtual_files)
-    current_scan_offset = getattr(app_instance, "resume_offset", 0)
+    """Worker function that runs in a background thread to scan the disk virtually in segments."""
+    chunk_size = 128 * 1024 * 1024  # 128 MB scan step
     
+    # Ensure MFT table is loaded exactly once
+    with app_instance.segment_lock:
+        mft_already_loaded = hasattr(app_instance, "ntfs_deleted_files")
+        if not mft_already_loaded:
+            app_instance.ntfs_deleted_files = None
+            
+    if not mft_already_loaded:
+        try:
+            from ntfs import scan_ntfs_deleted_files
+            app_instance.msg_queue.put(("status", "Silinmiş dosya isimleri taranıyor..."))
+            mft_data = scan_ntfs_deleted_files(drive_path, app_instance.disk_lock)
+            with app_instance.segment_lock:
+                app_instance.ntfs_deleted_files = mft_data
+        except Exception as e:
+            print(f"NTFS meta veri ayıklama hatası: {e}")
+            with app_instance.segment_lock:
+                app_instance.ntfs_deleted_files = {}
+
     app_instance.msg_queue.put(("status", "Sektörler okunuyor..."))
     
     start_time = time.time() - getattr(app_instance, "elapsed_seconds", 0.0)
     total_paused_time = 0.0
     last_update_time = 0.0
     
-    try:
-        with open(drive_path, "rb") as disk:
-            with app_instance.disk_lock:
-                app_instance.active_disk_handle = disk
+    def send_progress(current_bytes):
+        nonlocal last_update_time
+        current_time = time.time()
+        if current_time - last_update_time >= 0.3:
+            last_update_time = current_time
+            elapsed_time = current_time - start_time - total_paused_time
+            if elapsed_time <= 0:
+                elapsed_time = 0.001
                 
-            buffer = b""
-            buffer_start_offset = 0
+            total_size = app_instance.active_drive_size
+            scan_start = getattr(app_instance, "scan_start_offset", 0)
+            scan_end = getattr(app_instance, "scan_end_offset", total_size)
+            range_size = scan_end - scan_start
+            if range_size <= 0:
+                range_size = total_size
+            
+            with app_instance.segment_lock:
+                total_scanned_bytes = sum(app_instance.segment_progress.values())
+            
+            # Speed (MB/s)
+            speed_mb = (total_scanned_bytes / (1024 * 1024)) / elapsed_time
+            
+            # Percentage
+            if range_size > 0:
+                pct = (total_scanned_bytes / range_size) * 100
+                if pct > 100: pct = 100.0
+            else:
+                pct = 0.0
+                
+            # ETA
+            if pct > 0.1 and speed_mb > 0.01 and range_size > 0:
+                remaining_bytes = range_size - total_scanned_bytes
+                remaining_seconds = remaining_bytes / (speed_mb * 1024 * 1024)
+                
+                eta_hours = int(remaining_seconds // 3600)
+                eta_mins = int((remaining_seconds % 3600) // 60)
+                eta_secs = int(remaining_seconds % 60)
+                if eta_hours > 0:
+                    eta_str = f"{eta_hours} sa {eta_mins} dk"
+                elif eta_mins > 0:
+                    eta_str = f"{eta_mins} dk {eta_secs} sn"
+                else:
+                    eta_str = f"{eta_secs} sn"
+            else:
+                eta_str = "Hesaplanıyor..."
+                
+            # Elapsed formatted
+            el_hours = int(elapsed_time // 3600)
+            el_mins = int((elapsed_time % 3600) // 60)
+            el_secs = int(elapsed_time % 60)
+            if el_hours > 0:
+                elapsed_str = f"{el_hours:02d}:{el_mins:02d}:{el_secs:02d}"
+            else:
+                elapsed_str = f"{el_mins:02d}:{el_secs:02d}"
+                
+            app_instance.msg_queue.put(("progress_update", {
+                "pct": pct,
+                "gb": total_scanned_bytes / (1024 * 1024 * 1024),
+                "total_gb": range_size / (1024 * 1024 * 1024) if range_size > 0 else 0.0,
+                "speed": speed_mb,
+                "elapsed": elapsed_str,
+                "eta": eta_str,
+                "offset": scan_start + total_scanned_bytes,
+                "elapsed_seconds": elapsed_time
+            }))
+
+    try:
+        worker_lock = threading.Lock()
+        # Open separate handle per worker for true parallel seek/read operations
+        with open(drive_path, "rb", buffering=0) as disk:
             
             while app_instance.is_scanning:
-                # Pause control
-                if app_instance.scan_paused:
-                    pause_start = time.time()
-                    while app_instance.scan_paused and app_instance.is_scanning:
-                        time.sleep(0.2)
-                    total_paused_time += (time.time() - pause_start)
-                    
-                if not app_instance.is_scanning:
+                segment = None
+                with app_instance.segment_lock:
+                    if app_instance.scan_segments:
+                        segment = app_instance.scan_segments.pop(0)
+                        
+                if not segment:
                     break
-
                     
-                try:
-                    with app_instance.disk_lock:
-                        disk.seek(current_scan_offset)
-                        chunk = disk.read(chunk_size)
-                        current_scan_offset = disk.tell()
-                    if not chunk:
+                segment_start, segment_end = segment
+                
+                # Make sure segment key is initialized in progress mapping
+                with app_instance.segment_lock:
+                    if segment_start not in app_instance.segment_progress:
+                        app_instance.segment_progress[segment_start] = 0
+                
+                # Scale queue capacity to respect memory bounds
+                worker_count = int(getattr(app_instance, "active_worker_count", 1))
+                queue_max = max(2, 32 // worker_count)
+                read_queue = queue.Queue(maxsize=queue_max)
+                
+                # Start segment reader thread
+                reader_thread = threading.Thread(
+                    target=producer_read_segment_loop, 
+                    args=(disk, read_queue, app_instance, chunk_size, segment_start, segment_end, worker_lock), 
+                    daemon=True
+                )
+                reader_thread.start()
+                
+                buffer = b""
+                buffer_start_offset = segment_start
+                
+                while app_instance.is_scanning:
+                    # Pause control
+                    if app_instance.scan_paused:
+                        pause_start = time.time()
+                        while app_instance.scan_paused and app_instance.is_scanning:
+                            time.sleep(0.2)
+                        total_paused_time += (time.time() - pause_start)
+                        
+                    if not app_instance.is_scanning:
                         break
-                except Exception as e:
-                    app_instance.msg_queue.put(("error", f"Okuma Hatası: {e}"))
-                    break
-                    
-                buffer += chunk
-                
-                # Calculate progress metrics
-                elapsed_time = time.time() - start_time - total_paused_time
-                if elapsed_time <= 0:
-                    elapsed_time = 0.001
-                    
-                total_size = app_instance.active_drive_size
-                bytes_scanned = current_scan_offset
-                
-                # Speed (MB/s)
-                speed_mb = (bytes_scanned / (1024 * 1024)) / elapsed_time
-                
-                # Percentage
-                if total_size > 0:
-                    pct = (bytes_scanned / total_size) * 100
-                    if pct > 100: pct = 100.0
-                else:
-                    pct = 0.0
-                    
-                # ETA
-                if pct > 0.1 and speed_mb > 0.01 and total_size > 0:
-                    remaining_bytes = total_size - bytes_scanned
-                    remaining_seconds = remaining_bytes / (speed_mb * 1024 * 1024)
-                    
-                    eta_hours = int(remaining_seconds // 3600)
-                    eta_mins = int((remaining_seconds % 3600) // 60)
-                    eta_secs = int(remaining_seconds % 60)
-                    if eta_hours > 0:
-                        eta_str = f"{eta_hours} sa {eta_mins} dk"
-                    elif eta_mins > 0:
-                        eta_str = f"{eta_mins} dk {eta_secs} sn"
-                    else:
-                        eta_str = f"{eta_secs} sn"
-                else:
-                    eta_str = "Hesaplanıyor..."
-                    
-                # Elapsed formatted
-                el_hours = int(elapsed_time // 3600)
-                el_mins = int((elapsed_time % 3600) // 60)
-                el_secs = int(elapsed_time % 60)
-                if el_hours > 0:
-                    elapsed_str = f"{el_hours:02d}:{el_mins:02d}:{el_secs:02d}"
-                else:
-                    elapsed_str = f"{el_mins:02d}:{el_secs:02d}"
-                    
-                # Throttle progress updates to UI at most 3 times per second
-                current_time = time.time()
-                if current_time - last_update_time >= 0.3:
-                    last_update_time = current_time
-                    app_instance.msg_queue.put(("progress_update", {
-                        "pct": pct,
-                        "gb": bytes_scanned / (1024 * 1024 * 1024),
-                        "total_gb": total_size / (1024 * 1024 * 1024) if total_size > 0 else 0.0,
-                        "speed": speed_mb,
-                        "elapsed": elapsed_str,
-                        "eta": eta_str,
-                        "offset": bytes_scanned,
-                        "elapsed_seconds": elapsed_time
-                    }))
-                
-                matched = True
-                while matched and app_instance.is_scanning:
-                    while app_instance.scan_paused and app_instance.is_scanning:
-                        time.sleep(0.2)
                         
-                    matched = False
-                    for sig in signatures:
-                        header = sig["header"]
-                        header_len = len(header)
-                        
-                        if sig["ext"] == ".mp4":
-                            idx = buffer.find(b"ftyp")
-                            if idx >= 4:
-                                start_idx = idx - 4
-                            else:
-                                start_idx = -1
-                        else:
-                            start_idx = buffer.find(header)
+                    try:
+                        # Fetch next pre-read chunk from queue
+                        try:
+                            chunk_offset, chunk = read_queue.get(timeout=0.2)
+                        except queue.Empty:
+                            continue
                             
-                        if start_idx != -1:
-                            # File found! Find size dynamically and memory-efficiently
-                            absolute_start_offset = buffer_start_offset + start_idx
-                            file_len = 0
+                        if chunk_offset == "error":
+                            app_instance.msg_queue.put(("error", f"Okuma Hatası: {chunk}"))
+                            break
+                        if chunk_offset is None:
+                            # End of segment
+                            break
+                    except Exception as e:
+                        app_instance.msg_queue.put(("error", f"Hata: {e}"))
+                        break
+                        
+                    buffer += chunk
+                    
+                    # Update this segment's progress
+                    scanned_in_segment = chunk_offset + len(chunk) - segment_start
+                    with app_instance.segment_lock:
+                        app_instance.segment_progress[segment_start] = scanned_in_segment
+                        
+                    send_progress(chunk_offset + len(chunk))
+                    
+                    matched = True
+                    while matched and app_instance.is_scanning:
+                        while app_instance.scan_paused and app_instance.is_scanning:
+                            time.sleep(0.2)
+                            
+                        matched = False
+                        for sig in signatures:
+                            header = sig["header"]
+                            header_len = len(header)
                             
                             if sig["ext"] == ".mp4":
-                                # Parse box sizes sequentially without loading stream into RAM
-                                file_len = get_mp4_size(disk, absolute_start_offset, app_instance.disk_lock)
-                            elif sig["ext"] == ".zip":
-                                # Parse actual ZIP size using EOCD
-                                file_len = get_zip_size(disk, absolute_start_offset, app_instance.disk_lock)
-                            elif sig["footer"]:
-                                # Search footer signature dynamically on disk
-                                file_len = find_footer_offset(disk, absolute_start_offset, sig["footer"], app_instance.disk_lock)
+                                idx = buffer.find(b"ftyp")
+                                if idx >= 4:
+                                    start_idx = idx - 4
+                                else:
+                                    start_idx = -1
                             else:
-                                # For archives/others without footers (like RAR), default to 1MB
-                                file_len = 1 * 1024 * 1024
-
+                                start_idx = buffer.find(header)
                                 
-                            # Try to extract the original filename from the first 2KB of raw bytes
-                            extracted_name = None
-                            try:
-                                header_bytes = read_raw_bytes_shared(disk, absolute_start_offset, 2048, app_instance.disk_lock)
-                                extracted_name = extract_filename_from_bytes(header_bytes, sig["ext"])
-                            except:
-                                pass
+                            if start_idx != -1:
+                                # File found! Find size dynamically and memory-efficiently
+                                absolute_start_offset = buffer_start_offset + start_idx
+                                file_len = 0
                                 
-                            file_count += 1
-                            fmt_name = sig["ext"].replace(".", "").lower()
-                            
-                            if extracted_name:
-                                name_val = f"{extracted_name}{sig['ext']}"
-                            else:
-                                name_val = f"kurtarilan_{fmt_name}_{file_count}{sig['ext']}"
+                                # Query original MFT metadata
+                                from ntfs import find_original_file_meta
+                                original_meta = find_original_file_meta(app_instance, absolute_start_offset)
                                 
-                            file_meta = {
-                                "id": file_count,
-                                "name": name_val,
-                                "offset": absolute_start_offset,
-                                "size": file_len,
-                                "ext": sig["ext"],
-                                "category": sig["category"],
-                                "type_name": sig["ext"].replace(".", "").upper()
-                            }
-                            app_instance.msg_queue.put(("recovered_file_meta", file_meta))
-                            
-                            # Slide buffer forward past header
-                            buffer = buffer[start_idx + header_len:]
-                            buffer_start_offset += start_idx + header_len
-                            matched = True
-                            break
-                            
-                    # Prune buffer to keep RAM usage under 1MB when not matching
-                    if not matched:
-                        overlap = 64 * 1024
-                        if len(buffer) > overlap:
-                            discard_len = len(buffer) - overlap
-                            buffer = buffer[discard_len:]
-                            buffer_start_offset += discard_len
+                                if original_meta:
+                                    original_name, original_size = original_meta
+                                    file_len = original_size
+                                else:
+                                    if sig["ext"] == ".mp4":
+                                        # Parse box sizes sequentially without loading stream into RAM
+                                        file_len = get_mp4_size(disk, absolute_start_offset, worker_lock)
+                                    elif sig["ext"] == ".zip":
+                                        # Parse actual ZIP size using EOCD
+                                        file_len = get_zip_size(disk, absolute_start_offset, worker_lock)
+                                    elif sig["footer"]:
+                                        # Search footer signature inside the memory buffer first to avoid disk seeks/reads
+                                        footer_sig = sig["footer"]
+                                        footer_idx_in_buf = buffer.find(footer_sig, start_idx + header_len)
+                                        if footer_idx_in_buf != -1:
+                                            file_len = footer_idx_in_buf + len(footer_sig) - start_idx
+                                        else:
+                                            # Fallback to reading disk with a strict cap based on extension
+                                            limit_map = {".jpg": 8 * 1024 * 1024, ".png": 12 * 1024 * 1024, ".pdf": 20 * 1024 * 1024}
+                                            max_search = limit_map.get(sig["ext"], 15 * 1024 * 1024)
+                                            file_len = find_footer_offset(disk, absolute_start_offset, footer_sig, worker_lock, max_search_size=max_search)
+                                    else:
+                                        # For archives/others without footers (like RAR), default to 1MB
+                                        file_len = 1 * 1024 * 1024
+                                    
+                                # Try to extract the original filename from the first 2KB of raw bytes
+                                extracted_name = None
+                                is_previewable = False
+                                try:
+                                    header_bytes = read_raw_bytes_shared(disk, absolute_start_offset, 2048, worker_lock)
+                                    extracted_name = extract_filename_from_bytes(header_bytes, sig["ext"])
+                                    
+                                    # Validate previewable state using the already loaded header bytes
+                                    if sig["ext"] in [".jpg", ".jpeg", ".png"]:
+                                        try:
+                                            import io
+                                            from PIL import Image
+                                            Image.open(io.BytesIO(header_bytes))
+                                            is_previewable = True
+                                        except:
+                                            pass
+                                except:
+                                    pass
+                                    
+                                with app_instance.disk_lock:
+                                    app_instance.total_recovered_count += 1
+                                    file_count = app_instance.total_recovered_count
+                                    
+                                fmt_name = sig["ext"].replace(".", "").lower()
+                                
+                                if original_meta:
+                                    name_val = original_name
+                                elif extracted_name:
+                                    name_val = f"{extracted_name}{sig['ext']}"
+                                else:
+                                    name_val = f"kurtarilan_{fmt_name}_{file_count}{sig['ext']}"
+                                    
+                                file_meta = {
+                                    "id": file_count,
+                                    "name": name_val,
+                                    "offset": absolute_start_offset,
+                                    "size": file_len,
+                                    "ext": sig["ext"],
+                                    "category": sig["category"],
+                                    "type_name": sig["ext"].replace(".", "").upper(),
+                                    "is_previewable": is_previewable
+                                }
+                                app_instance.msg_queue.put(("recovered_file_meta", file_meta))
+                                
+                                # Slide buffer forward past header
+                                buffer = buffer[start_idx + header_len:]
+                                buffer_start_offset += start_idx + header_len
+                                
+                                scanned_in_segment = buffer_start_offset - segment_start
+                                with app_instance.segment_lock:
+                                    app_instance.segment_progress[segment_start] = scanned_in_segment
+                                    
+                                send_progress(buffer_start_offset)
+                                matched = True
+                                break
+                                
+                        # Prune buffer to keep RAM usage under 1MB when not matching
+                        if not matched:
+                            overlap = 64 * 1024
+                            if len(buffer) > overlap:
+                                discard_len = len(buffer) - overlap
+                                buffer = buffer[discard_len:]
+                                buffer_start_offset += discard_len
+                                
+                # Mark segment as completely scanned when done
+                with app_instance.segment_lock:
+                    app_instance.segment_progress[segment_start] = segment_end - segment_start
+                    
     except PermissionError:
         app_instance.msg_queue.put(("error", "HATA: Yönetici yetkileri eksik veya disk erişime kapalı."))
     except Exception as e:
         app_instance.msg_queue.put(("error", f"Hata: {e}"))
         
     with app_instance.disk_lock:
-        app_instance.active_disk_handle = None
+        # Check if any other workers are still running
+        running_workers = False
+        # If active_disk_handle is cleared here, it might interfere with other threads,
+        # but since they all open their own handles, we don't have to clear active_disk_handle
+        # unless it is the last thread finishing.
+        pass
         
-    app_instance.is_scanning = False
-    app_instance.msg_queue.put(("finished", f"Sanal tarama bitti! Toplam {file_count} dosya izi bulundu."))
+    # Wait until all workers finish to send finished message
+    with app_instance.segment_lock:
+        # Check if all segments are completed
+        all_done = True
+        for start, prog in app_instance.segment_progress.items():
+            # Find the segment size
+            for seg_start, seg_end in app_instance.scan_segments:
+                if seg_start == start:
+                    if prog < (seg_end - seg_start):
+                        all_done = False
+                        break
+            if not all_done:
+                break
+                
+    if all_done:
+        app_instance.is_scanning = False
+        # Get count
+        with app_instance.disk_lock:
+            total_cnt = app_instance.total_recovered_count
+        app_instance.msg_queue.put(("finished", f"Sanal tarama bitti! Toplam {total_cnt} dosya izi bulundu."))

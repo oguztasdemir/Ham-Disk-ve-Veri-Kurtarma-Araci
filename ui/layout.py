@@ -4,6 +4,22 @@ from config import CATEGORIES
 
 class LayoutMixin:
     def create_widgets(self):
+        # Console Log Button placed at the top-right corner of the application window
+        self.log_btn = tk.Button(
+            self, 
+            text="📋 Konsol Akışı", 
+            command=self.show_console_log_window, 
+            bg="#2F3542", 
+            fg=self.text_white, 
+            activebackground=self.accent_blue, 
+            activeforeground=self.text_white, 
+            borderwidth=0, 
+            padx=10, 
+            pady=5, 
+            font=("Segoe UI", 9, "bold")
+        )
+        self.log_btn.place(relx=1.0, rely=0.0, anchor="ne", x=-10, y=10)
+
         # Left Sidebar
         sidebar = tk.Frame(self, bg=self.sidebar_bg, width=260)
         sidebar.pack(side=tk.LEFT, fill=tk.Y)
@@ -49,13 +65,87 @@ class LayoutMixin:
         self.show_dashboard_view()
 
     def init_dashboard_view(self):
-        settings_bar = tk.Frame(self.dashboard_view, bg=self.content_bg)
+        # Split dashboard into Left (Controls) and Right (RAM & Log Panel)
+        self.dash_left_frame = tk.Frame(self.dashboard_view, bg=self.content_bg)
+        self.dash_left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        self.dash_right_frame = tk.Frame(self.dashboard_view, bg=self.content_bg, width=280)
+        self.dash_right_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=(20, 0))
+        self.dash_right_frame.pack_propagate(False)
+        
+        # RAM usage label at top-right of dashboard view
+        self.ram_lbl = tk.Label(self.dash_right_frame, text="RAM: Yükleniyor...", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 9, "bold"))
+        self.ram_lbl.pack(anchor="ne", pady=(0, 10))
+        
+        # Toggle Log Stream Button
+        self.toggle_log_btn = tk.Button(
+            self.dash_right_frame, 
+            text="📖 Terminal Logunu Göster", 
+            command=self.toggle_dashboard_log, 
+            bg="#2F3542", 
+            fg=self.text_white, 
+            activebackground=self.accent_blue, 
+            activeforeground=self.text_white, 
+            borderwidth=0, 
+            padx=10, 
+            pady=5, 
+            font=("Segoe UI", 8, "bold")
+        )
+        self.toggle_log_btn.pack(anchor="ne", fill=tk.X, pady=(0, 10))
+        
+        # S.M.A.R.T Diagnostics panel at the bottom of the right panel
+        self.drive_info_frame = tk.LabelFrame(
+            self.dash_right_frame, 
+            text=" Sürücü S.M.A.R.T Sağlık Raporu ", 
+            bg=self.content_bg, 
+            fg=self.text_dark, 
+            font=("Segoe UI", 9, "bold"),
+            padx=10,
+            pady=10
+        )
+        self.drive_info_frame.pack(fill=tk.X, pady=(10, 0), side=tk.BOTTOM)
+        
+        self.lbl_drive_model = tk.Label(self.drive_info_frame, text="Model: Seçilmedi", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 9), anchor="w", justify="left", wraplength=230)
+        self.lbl_drive_model.pack(fill=tk.X, pady=2)
+        
+        self.lbl_drive_health = tk.Label(self.drive_info_frame, text="Sağlık (SMART): -", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 9), anchor="w")
+        self.lbl_drive_health.pack(fill=tk.X, pady=2)
+        
+        self.lbl_drive_partition = tk.Label(self.drive_info_frame, text="Bölümleme Stili: -", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 9), anchor="w")
+        self.lbl_drive_partition.pack(fill=tk.X, pady=2)
+        
+        self.lbl_drive_capacity = tk.Label(self.drive_info_frame, text="Kapasite: -", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 9), anchor="w")
+        self.lbl_drive_capacity.pack(fill=tk.X, pady=2)
+        
+        # Embedded Log Panel (starts hidden)
+        self.dash_log_panel = tk.Frame(self.dash_right_frame, bg="#1E1E24")
+        
+        log_scroll = ttk.Scrollbar(self.dash_log_panel, orient="vertical")
+        log_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        self.dash_log_text = tk.Text(
+            self.dash_log_panel, 
+            bg="#2F3542", 
+            fg="#FFFFFF", 
+            insertbackground="white", 
+            yscrollcommand=log_scroll.set, 
+            font=("Consolas", 8), 
+            state="disabled", 
+            wrap="char"
+        )
+        self.dash_log_text.pack(fill=tk.BOTH, expand=True)
+        log_scroll.config(command=self.dash_log_text.yview)
+        
+        self.dash_log_visible = False
+
+        settings_bar = tk.Frame(self.dash_left_frame, bg=self.content_bg)
         settings_bar.pack(fill=tk.X, pady=(0, 20))
         
         tk.Label(settings_bar, text="Sürücü Seçin:", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 10, "bold")).pack(side=tk.LEFT, padx=(0, 10))
         self.drive_var = tk.StringVar()
         self.drive_combo = ttk.Combobox(settings_bar, textvariable=self.drive_var, state="readonly", width=30)
         self.drive_combo.pack(side=tk.LEFT, padx=(0, 10))
+        self.drive_combo.bind("<<ComboboxSelected>>", self.on_drive_select)
         
         refresh_btn = tk.Button(settings_bar, text="Yenile", command=self.load_physical_drives, bg="#F1F2F6", fg=self.text_dark, borderwidth=1, relief="solid", padx=10, font=("Segoe UI", 9))
         refresh_btn.pack(side=tk.LEFT, padx=(0, 10))
@@ -63,13 +153,113 @@ class LayoutMixin:
         self.start_btn = tk.Button(settings_bar, text="SANAL TARAMAYI BAŞLAT", command=self.start_recovery, bg=self.accent_blue, fg=self.text_white, borderwidth=0, padx=15, pady=5, font=("Segoe UI", 9, "bold"))
         self.start_btn.pack(side=tk.LEFT)
         
-        self.scan_header_lbl = tk.Label(self.dashboard_view, text="Cihaz Seçin ve Taramayı Başlatın", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 16, "bold"))
+        # Parallel scan settings bar
+        self.parallel_bar = tk.Frame(self.dash_left_frame, bg=self.content_bg)
+        self.parallel_bar.pack(fill=tk.X, pady=(0, 20))
+        
+        self.parallel_cb = tk.Checkbutton(
+            self.parallel_bar,
+            text="Paralel Motorlar ile Parçalı Tara",
+            variable=self.use_parallel_var,
+            command=self.toggle_parallel_options,
+            bg=self.content_bg,
+            fg=self.accent_blue,
+            activebackground=self.content_bg,
+            activeforeground=self.accent_blue,
+            font=("Segoe UI", 9, "bold")
+        )
+        self.parallel_cb.pack(side=tk.LEFT, padx=(0, 15))
+        
+        self.worker_lbl = tk.Label(self.parallel_bar, text="Motor Sayısı (Thread):", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 9))
+        self.worker_lbl.pack(side=tk.LEFT, padx=(0, 5))
+        
+        self.worker_combo = ttk.Combobox(
+            self.parallel_bar,
+            textvariable=self.worker_count_var,
+            values=[str(i) for i in range(1, 17)],
+            state="disabled",
+            width=5
+        )
+        self.worker_combo.pack(side=tk.LEFT, padx=(0, 15))
+        
+        self.segment_lbl = tk.Label(self.parallel_bar, text="Parça Boyutu (GB):", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 9))
+        self.segment_lbl.pack(side=tk.LEFT, padx=(0, 5))
+        
+        self.segment_entry = tk.Entry(
+            self.parallel_bar,
+            textvariable=self.segment_size_gb_var,
+            state="disabled",
+            width=8
+        )
+        self.segment_entry.pack(side=tk.LEFT, padx=(0, 15))
+        
+        self.parallel_warn_lbl = tk.Label(
+            self.parallel_bar,
+            text="⚠️ HDD sürücüler için 1 veya 2 motor önerilir!",
+            bg=self.content_bg,
+            fg="#FF4757",
+            font=("Segoe UI", 8, "italic")
+        )
+        self.parallel_warn_lbl.pack(side=tk.LEFT)
+        
+        # Custom range settings bar
+        self.custom_range_bar = tk.Frame(self.dash_left_frame, bg=self.content_bg)
+        self.custom_range_bar.pack(fill=tk.X, pady=(0, 20))
+        
+        self.custom_range_cb = tk.Checkbutton(
+            self.custom_range_bar,
+            text="Özel Bellek Aralığı Tara",
+            variable=self.use_custom_range_var,
+            command=self.toggle_parallel_options,
+            bg=self.content_bg,
+            fg=self.accent_blue,
+            activebackground=self.content_bg,
+            activeforeground=self.accent_blue,
+            font=("Segoe UI", 9, "bold")
+        )
+        self.custom_range_cb.pack(side=tk.LEFT, padx=(0, 15))
+        
+        self.custom_start_lbl = tk.Label(self.custom_range_bar, text="Başlangıç:", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 9))
+        self.custom_start_lbl.pack(side=tk.LEFT, padx=(0, 5))
+        
+        self.custom_start_entry = tk.Entry(
+            self.custom_range_bar,
+            textvariable=self.custom_start_var,
+            state="disabled",
+            width=8
+        )
+        self.custom_start_entry.pack(side=tk.LEFT, padx=(0, 15))
+        
+        self.custom_end_lbl = tk.Label(self.custom_range_bar, text="Bitiş:", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 9))
+        self.custom_end_lbl.pack(side=tk.LEFT, padx=(0, 5))
+        
+        self.custom_end_entry = tk.Entry(
+            self.custom_range_bar,
+            textvariable=self.custom_end_var,
+            state="disabled",
+            width=8
+        )
+        self.custom_end_entry.pack(side=tk.LEFT, padx=(0, 15))
+        
+        self.custom_unit_lbl = tk.Label(self.custom_range_bar, text="Birim:", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 9))
+        self.custom_unit_lbl.pack(side=tk.LEFT, padx=(0, 5))
+        
+        self.custom_unit_combo = ttk.Combobox(
+            self.custom_range_bar,
+            textvariable=self.custom_unit_var,
+            values=["MB", "GB", "TB"],
+            state="disabled",
+            width=5
+        )
+        self.custom_unit_combo.pack(side=tk.LEFT)
+        
+        self.scan_header_lbl = tk.Label(self.dash_left_frame, text="Cihaz Seçin ve Taramayı Başlatın", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 16, "bold"))
         self.scan_header_lbl.pack(anchor="w", pady=(0, 5))
         
-        self.scan_progress_lbl = tk.Label(self.dashboard_view, text="Taramayı başlattığınızda veriler yer kaplamadan burada listelenecektir.", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 10))
+        self.scan_progress_lbl = tk.Label(self.dash_left_frame, text="Taramayı başlattığınızda veriler yer kaplamadan burada listelenecektir.", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 10))
         self.scan_progress_lbl.pack(anchor="w", pady=(0, 20))
         
-        self.cards_frame = tk.Frame(self.dashboard_view, bg=self.content_bg)
+        self.cards_frame = tk.Frame(self.dash_left_frame, bg=self.content_bg)
         self.cards_frame.pack(fill=tk.X, pady=10)
         
         self.card_widgets = {}
@@ -99,7 +289,35 @@ class LayoutMixin:
                 
             self.card_widgets[name] = {"count_lbl": count_lbl, "frame": card}
             
-        ctrl_frame = tk.Frame(self.dashboard_view, bg=self.content_bg)
+        # Disk Visual Map Frame
+        self.disk_map_frame = tk.Frame(self.dash_left_frame, bg=self.content_bg)
+        self.disk_map_frame.pack(fill=tk.X, pady=(10, 0))
+        
+        map_title_row = tk.Frame(self.disk_map_frame, bg=self.content_bg)
+        map_title_row.pack(fill=tk.X, pady=(0, 5))
+        
+        tk.Label(map_title_row, text="Diskin Görsel Durum Haritası (100 Blok)", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 9, "bold")).pack(side=tk.LEFT)
+        
+        # Legend (Lejant)
+        legend_frame = tk.Frame(map_title_row, bg=self.content_bg)
+        legend_frame.pack(side=tk.RIGHT)
+        
+        # Unscanned legend
+        tk.Frame(legend_frame, bg="#2F3542", width=12, height=12).pack(side=tk.LEFT, padx=(10, 4))
+        tk.Label(legend_frame, text="Taranmadı", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 8)).pack(side=tk.LEFT)
+        
+        # Scanning legend
+        tk.Frame(legend_frame, bg="#FF9F43", width=12, height=12).pack(side=tk.LEFT, padx=(10, 4))
+        tk.Label(legend_frame, text="Taranıyor", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 8)).pack(side=tk.LEFT)
+        
+        # Scanned legend
+        tk.Frame(legend_frame, bg="#10AC84", width=12, height=12).pack(side=tk.LEFT, padx=(10, 4))
+        tk.Label(legend_frame, text="Tarandı", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 8)).pack(side=tk.LEFT)
+        
+        self.disk_map_canvas = tk.Canvas(self.disk_map_frame, bg="#1E272E", height=60, highlightthickness=1, highlightbackground="#57606F")
+        self.disk_map_canvas.pack(fill=tk.X)
+            
+        ctrl_frame = tk.Frame(self.dash_left_frame, bg=self.content_bg)
         ctrl_frame.pack(fill=tk.X, pady=20)
         
         self.pause_btn = tk.Button(ctrl_frame, text="DURAKLAT", command=self.pause_recovery, state="disabled", bg="#CED6E0", fg=self.text_dark, borderwidth=0, padx=15, pady=8, font=("Segoe UI", 9, "bold"))
@@ -114,14 +332,14 @@ class LayoutMixin:
         self.inspect_btn = tk.Button(ctrl_frame, text="🔎 Bulunan Öğeleri İnceleyin", command=self.show_file_view, bg=self.accent_blue, fg=self.text_white, borderwidth=0, padx=20, pady=8, font=("Segoe UI", 9, "bold"))
         self.inspect_btn.pack(side=tk.RIGHT)
         
-        self.status_lbl = tk.Label(self.dashboard_view, text="Hazır.", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 9))
+        self.status_lbl = tk.Label(self.dash_left_frame, text="Hazır.", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 9))
         self.status_lbl.pack(side=tk.BOTTOM, anchor="w")
-
-        self.progress_bar = ttk.Progressbar(self.dashboard_view, orient="horizontal", mode="determinate")
+ 
+        self.progress_bar = ttk.Progressbar(self.dash_left_frame, orient="horizontal", mode="determinate")
         self.progress_bar.pack(fill=tk.X, side=tk.BOTTOM, pady=10)
-
+ 
         # Stats Grid for comprehensive metadata
-        self.stats_frame = tk.Frame(self.dashboard_view, bg=self.content_bg)
+        self.stats_frame = tk.Frame(self.dash_left_frame, bg=self.content_bg)
         self.stats_frame.pack(fill=tk.X, side=tk.BOTTOM, pady=(0, 5))
         
         self.lbl_progress_title = tk.Label(self.stats_frame, text="İlerleme:", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 9, "bold"))
@@ -182,9 +400,15 @@ class LayoutMixin:
             "İsim (Z-A)", 
             "Boyut (Büyükten Küçüğe)", 
             "Boyut (Küçükten Büyüye)"
-        ], state="readonly", width=22)
+        ], state="readonly", width=18)
         self.sort_combo.pack(side=tk.LEFT)
         self.sort_combo.bind("<<ComboboxSelected>>", lambda e: self.on_sort_combo_change())
+        
+        tk.Label(filter_row, text="🔍 Ara:", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 9, "bold")).pack(side=tk.LEFT, padx=(15, 5))
+        self.search_var = tk.StringVar()
+        self.search_entry = tk.Entry(filter_row, textvariable=self.search_var, width=15)
+        self.search_entry.pack(side=tk.LEFT, padx=(0, 5))
+        self.search_entry.bind("<KeyRelease>", lambda e: self.update_file_listbox_view())
         
         # Create a frame to hold Treeview and Scrollbars
         tree_frame = tk.Frame(list_panel, bg=self.content_bg)
@@ -235,8 +459,11 @@ class LayoutMixin:
         btn_frame = tk.Frame(list_panel, bg=self.content_bg)
         btn_frame.pack(fill=tk.X)
         
+        self.move_to_folder_btn = tk.Button(btn_frame, text="📁 Seçilenleri Klasöre Taşı", command=self.move_selected_to_folder, bg="#2F3542", fg=self.text_white, borderwidth=0, padx=15, pady=8, font=("Segoe UI", 9, "bold"))
+        self.move_to_folder_btn.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
+        
         self.export_sel_btn = tk.Button(btn_frame, text="Seçilenleri Bilgisayara Kaydet", command=self.export_selected, bg=self.accent_blue, fg=self.text_white, borderwidth=0, padx=15, pady=8, font=("Segoe UI", 9, "bold"))
-        self.export_sel_btn.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
+        self.export_sel_btn.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(5, 5))
         
         self.export_all_btn = tk.Button(btn_frame, text="Hepsini Klasörlere Bölerek Kaydet", command=self.export_all, bg="#2F3542", fg=self.text_white, borderwidth=0, padx=15, pady=8, font=("Segoe UI", 9, "bold"))
         self.export_all_btn.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(5, 0))
@@ -276,6 +503,7 @@ class LayoutMixin:
     def show_dashboard_view(self):
         self.file_view.pack_forget()
         self.dashboard_view.pack(fill=tk.BOTH, expand=True)
+        self.draw_disk_map()
 
     def show_file_view(self):
         self.dashboard_view.pack_forget()
@@ -322,4 +550,173 @@ class LayoutMixin:
         if directory:
             self.selected_output_dir = os.path.abspath(directory)
             self.path_lbl.config(text=self.selected_output_dir)
+
+    def toggle_dashboard_log(self):
+        if self.dash_log_visible:
+            self.dash_log_panel.pack_forget()
+            self.toggle_log_btn.config(text="📖 Terminal Logunu Göster")
+            self.dash_log_visible = False
+        else:
+            self.dash_log_panel.pack(fill=tk.BOTH, expand=True)
+            self.toggle_log_btn.config(text="📕 Terminal Logunu Gizle")
+            self.dash_log_visible = True
+            
+            # Sync logs
+            try:
+                self.dash_log_text.config(state="normal")
+                self.dash_log_text.delete("1.0", tk.END)
+                self.dash_log_text.insert(tk.END, "".join(self.console_logs))
+                self.dash_log_text.config(state="disabled")
+                self.dash_log_text.see(tk.END)
+            except:
+                pass
+
+    def update_ram_usage(self):
+        import ctypes
+        class MEMORYSTATUSEX(ctypes.Structure):
+            _fields_ = [
+                ("dwLength", ctypes.c_ulong),
+                ("dwMemoryLoad", ctypes.c_ulong),
+                ("ullTotalPhys", ctypes.c_ulonglong),
+                ("ullAvailPhys", ctypes.c_ulonglong),
+                ("ullTotalPageFile", ctypes.c_ulonglong),
+                ("ullAvailPageFile", ctypes.c_ulonglong),
+                ("ullTotalVirtual", ctypes.c_ulonglong),
+                ("ullAvailVirtual", ctypes.c_ulonglong),
+                ("ullAvailExtendedVirtual", ctypes.c_ulonglong)
+            ]
+        try:
+            stat = MEMORYSTATUSEX()
+            stat.dwLength = ctypes.sizeof(stat)
+            ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(stat))
+            total = stat.ullTotalPhys
+            avail = stat.ullAvailPhys
+            used = total - avail
+            total_gb = total / (1024 * 1024 * 1024)
+            used_gb = used / (1024 * 1024 * 1024)
+            pct = stat.dwMemoryLoad
+            ram_str = f"RAM: {used_gb:.2f} GB / {total_gb:.2f} GB ({pct}%)"
+        except:
+            ram_str = "RAM: Bilinmiyor"
+            
+        if hasattr(self, "ram_lbl") and self.ram_lbl:
+            self.ram_lbl.config(text=ram_str)
+            
+        self.after(1000, self.update_ram_usage)
+
+    def toggle_parallel_options(self):
+        state = "normal" if self.use_parallel_var.get() else "disabled"
+        self.worker_combo.config(state=state if state == "disabled" else "readonly")
+        self.segment_entry.config(state=state)
+        
+        range_state = "normal" if self.use_custom_range_var.get() else "disabled"
+        self.custom_start_entry.config(state=range_state)
+        self.custom_end_entry.config(state=range_state)
+        self.custom_unit_combo.config(state=range_state if range_state == "disabled" else "readonly")
+
+    def draw_disk_map(self):
+        if not hasattr(self, "disk_map_canvas") or not self.disk_map_canvas:
+            return
+            
+        canvas_w = self.disk_map_canvas.winfo_width()
+        canvas_h = self.disk_map_canvas.winfo_height()
+        if canvas_w < 10: canvas_w = 600
+        if canvas_h < 10: canvas_h = 60
+        
+        self.disk_map_canvas.delete("all")
+        
+        total_size = self.active_drive_size if self.active_drive_size > 0 else 1.8 * 1024 * 1024 * 1024 * 1024
+        
+        cols = 20
+        rows = 5
+        total_blocks = cols * rows
+        
+        pad_x = 3
+        pad_y = 3
+        block_w = (canvas_w - (cols + 1) * pad_x) / cols
+        block_h = (canvas_h - (rows + 1) * pad_y) / rows
+        
+        scanned_intervals = []
+        if hasattr(self, "segment_progress") and self.segment_progress:
+            with self.segment_lock:
+                for seg_start, prog in self.segment_progress.items():
+                    seg_end = seg_start + 100 * 1024 * 1024 * 1024
+                    if hasattr(self, "scan_segments") and self.scan_segments:
+                        for start, end in self.scan_segments:
+                            if start == seg_start:
+                                seg_end = end
+                                break
+                    scanned_intervals.append((seg_start, seg_start + prog, seg_end))
+                    
+        for r in range(rows):
+            for c in range(cols):
+                i = r * cols + c
+                
+                block_start = (i / total_blocks) * total_size
+                block_end = ((i + 1) / total_blocks) * total_size
+                
+                total_scanned_in_block = 0
+                is_currently_scanning = False
+                
+                for seg_start, seg_scanned, seg_end in scanned_intervals:
+                    overlap_start = max(block_start, seg_start)
+                    overlap_end = min(block_end, seg_scanned)
+                    if overlap_end > overlap_start:
+                        total_scanned_in_block += (overlap_end - overlap_start)
+                    
+                    if seg_scanned > seg_start and seg_scanned < seg_end:
+                        if block_start <= seg_scanned <= block_end:
+                            is_currently_scanning = True
+                
+                block_len = block_end - block_start
+                scanned_pct = total_scanned_in_block / block_len if block_len > 0 else 0
+                
+                if is_currently_scanning:
+                    color = "#FF9F43"  # Scanning (Orange)
+                elif scanned_pct >= 0.95:
+                    color = "#10AC84"  # Scanned (Emerald Green)
+                elif scanned_pct > 0.05:
+                    color = "#2ECC71"  # Partially scanned (Green)
+                else:
+                    color = "#2F3542"  # Unscanned (Dark Blue/Gray)
+                    
+                x1 = pad_x + c * (block_w + pad_x)
+                y1 = pad_y + r * (block_h + pad_y)
+                x2 = x1 + block_w
+                y2 = y1 + block_h
+                
+                self.disk_map_canvas.create_rectangle(
+                    x1, y1, x2, y2,
+                    fill=color,
+                    outline="#57606F" if color == "#2F3542" else color,
+                    width=1
+                )
+
+    def on_drive_select(self, event=None):
+        selected = self.drive_var.get()
+        if not selected or not hasattr(self, "drives_details_map"):
+            return
+            
+        details = self.drives_details_map.get(selected)
+        if not details:
+            return
+            
+        # Update model label
+        self.lbl_drive_model.config(text=f"Model: {details['name']}")
+        
+        # Update health label
+        health = details['health']
+        color = "#10AC84" if health.lower() == "healthy" else "#FF4757"
+        self.lbl_drive_health.config(text=f"Sağlık (SMART): {health}", fg=color)
+        
+        # Update partition style
+        self.lbl_drive_partition.config(text=f"Bölümleme Stili: {details['partition_style']}")
+        
+        # Update capacity
+        size_gb = details['size_gb']
+        if size_gb >= 1024:
+            self.lbl_drive_capacity.config(text=f"Kapasite: {size_gb / 1024:.2f} TB")
+        else:
+            self.lbl_drive_capacity.config(text=f"Kapasite: {size_gb} GB")
+
 
