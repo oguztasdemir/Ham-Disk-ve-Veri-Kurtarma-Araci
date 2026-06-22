@@ -1,0 +1,1243 @@
+{
+    "active_drive": "\\\\.\\PhysicalDrive1",
+    "active_drive_size": 2000398933504,
+    "resume_offset": 167772160,
+    "virtual_files": [
+        {
+            "id": 1,
+            "name": "kurtarilan_jpg_1.jpg",
+            "offset": 1191855,
+            "size": 4,
+            "ext": ".jpg",
+            "category": "Resim",
+            "type_name": "JPG",
+            "is_previewable": false
+        },
+        {
+            "id": 2,
+            "name": "kurtarilan_jpg_2.jpg",
+            "offset": 65934971,
+            "size": 4,
+            "ext": ".jpg",
+            "category": "Resim",
+            "type_name": "JPG",
+            "is_previewable": false
+        },
+        {
+            "id": 3,
+            "name": "kurtarilan_jpg_3.jpg",
+            "offset": 71572700,
+            "size": 30475,
+            "ext": ".jpg",
+            "category": "Resim",
+            "type_name": "JPG",
+            "is_previewable": false
+        },
+        {
+            "id": 4,
+            "name": "msvcp140_arsiv.zip",
+            "offset": 73844634,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 5,
+            "name": "msvcp140_1_arsiv.zip",
+            "offset": 74030518,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 6,
+            "name": "msvcp140_2_arsiv.zip",
+            "offset": 74041905,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 7,
+            "name": "msvcp140_atomic_wait_arsiv.zip",
+            "offset": 74117186,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 8,
+            "name": "msvcp140_codecvt_ids_arsiv.zip",
+            "offset": 74137871,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 9,
+            "name": "vcamp140_arsiv.zip",
+            "offset": 74147742,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 10,
+            "name": "vccorlib140_arsiv.zip",
+            "offset": 74329980,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 11,
+            "name": "vcomp140_arsiv.zip",
+            "offset": 74440490,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 12,
+            "name": "vcruntime140_arsiv.zip",
+            "offset": 74520110,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 13,
+            "name": "AppxManifest_arsiv.zip",
+            "offset": 74560371,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 14,
+            "name": "AppxBlockMap_arsiv.zip",
+            "offset": 74561086,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 15,
+            "name": "Content_Types_arsiv.zip",
+            "offset": 74570448,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 16,
+            "name": "AppxMetadataCodeIntegrity_arsiv.zip",
+            "offset": 74570787,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 17,
+            "name": "AppxSignature_arsiv.zip",
+            "offset": 74579377,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 18,
+            "name": "kurtarilan_jpg_18.jpg",
+            "offset": 77618979,
+            "size": 36203,
+            "ext": ".jpg",
+            "category": "Resim",
+            "type_name": "JPG",
+            "is_previewable": false
+        },
+        {
+            "id": 19,
+            "name": "kurtarilan_png_19.png",
+            "offset": 77987856,
+            "size": 3201,
+            "ext": ".png",
+            "category": "Resim",
+            "type_name": "PNG",
+            "is_previewable": true
+        },
+        {
+            "id": 20,
+            "name": "kurtarilan_png_20.png",
+            "offset": 77991065,
+            "size": 6572,
+            "ext": ".png",
+            "category": "Resim",
+            "type_name": "PNG",
+            "is_previewable": true
+        },
+        {
+            "id": 21,
+            "name": "kurtarilan_png_21.png",
+            "offset": 77997645,
+            "size": 14091,
+            "ext": ".png",
+            "category": "Resim",
+            "type_name": "PNG",
+            "is_previewable": true
+        },
+        {
+            "id": 22,
+            "name": "kurtarilan_png_22.png",
+            "offset": 78011744,
+            "size": 14091,
+            "ext": ".png",
+            "category": "Resim",
+            "type_name": "PNG",
+            "is_previewable": true
+        },
+        {
+            "id": 23,
+            "name": "kurtarilan_png_23.png",
+            "offset": 78025843,
+            "size": 32583,
+            "ext": ".png",
+            "category": "Resim",
+            "type_name": "PNG",
+            "is_previewable": true
+        },
+        {
+            "id": 24,
+            "name": "kurtarilan_png_24.png",
+            "offset": 78058434,
+            "size": 32583,
+            "ext": ".png",
+            "category": "Resim",
+            "type_name": "PNG",
+            "is_previewable": true
+        },
+        {
+            "id": 25,
+            "name": "kurtarilan_png_25.png",
+            "offset": 78092696,
+            "size": 79210,
+            "ext": ".png",
+            "category": "Resim",
+            "type_name": "PNG",
+            "is_previewable": true
+        },
+        {
+            "id": 26,
+            "name": "kurtarilan_png_26.png",
+            "offset": 78171914,
+            "size": 1524,
+            "ext": ".png",
+            "category": "Resim",
+            "type_name": "PNG",
+            "is_previewable": true
+        },
+        {
+            "id": 27,
+            "name": "kurtarilan_png_27.png",
+            "offset": 78512128,
+            "size": 16268,
+            "ext": ".png",
+            "category": "Resim",
+            "type_name": "PNG",
+            "is_previewable": true
+        },
+        {
+            "id": 28,
+            "name": "kurtarilan_png_28.png",
+            "offset": 84279312,
+            "size": 244490,
+            "ext": ".png",
+            "category": "Resim",
+            "type_name": "PNG",
+            "is_previewable": true
+        },
+        {
+            "id": 29,
+            "name": "kurtarilan_png_29.png",
+            "offset": 84523810,
+            "size": 244490,
+            "ext": ".png",
+            "category": "Resim",
+            "type_name": "PNG",
+            "is_previewable": true
+        },
+        {
+            "id": 30,
+            "name": "kurtarilan_png_30.png",
+            "offset": 84768308,
+            "size": 65063,
+            "ext": ".png",
+            "category": "Resim",
+            "type_name": "PNG",
+            "is_previewable": true
+        },
+        {
+            "id": 31,
+            "name": "kurtarilan_png_31.png",
+            "offset": 84833379,
+            "size": 65063,
+            "ext": ".png",
+            "category": "Resim",
+            "type_name": "PNG",
+            "is_previewable": true
+        },
+        {
+            "id": 32,
+            "name": "kurtarilan_png_32.png",
+            "offset": 84898450,
+            "size": 18289,
+            "ext": ".png",
+            "category": "Resim",
+            "type_name": "PNG",
+            "is_previewable": true
+        },
+        {
+            "id": 33,
+            "name": "kurtarilan_png_33.png",
+            "offset": 84916747,
+            "size": 5033,
+            "ext": ".png",
+            "category": "Resim",
+            "type_name": "PNG",
+            "is_previewable": true
+        },
+        {
+            "id": 34,
+            "name": "kurtarilan_png_34.png",
+            "offset": 84921788,
+            "size": 5033,
+            "ext": ".png",
+            "category": "Resim",
+            "type_name": "PNG",
+            "is_previewable": true
+        },
+        {
+            "id": 35,
+            "name": "kurtarilan_png_35.png",
+            "offset": 84926829,
+            "size": 1579,
+            "ext": ".png",
+            "category": "Resim",
+            "type_name": "PNG",
+            "is_previewable": true
+        },
+        {
+            "id": 36,
+            "name": "kurtarilan_png_36.png",
+            "offset": 84928416,
+            "size": 1579,
+            "ext": ".png",
+            "category": "Resim",
+            "type_name": "PNG",
+            "is_previewable": true
+        },
+        {
+            "id": 37,
+            "name": "kurtarilan_png_37.png",
+            "offset": 84930003,
+            "size": 596,
+            "ext": ".png",
+            "category": "Resim",
+            "type_name": "PNG",
+            "is_previewable": true
+        },
+        {
+            "id": 38,
+            "name": "kurtarilan_pdf_38.pdf",
+            "offset": 85458944,
+            "size": 1505,
+            "ext": ".pdf",
+            "category": "Belge",
+            "type_name": "PDF"
+        },
+        {
+            "id": 39,
+            "name": "kurtarilan_jpg_39.jpg",
+            "offset": 99660412,
+            "size": 26390,
+            "ext": ".jpg",
+            "category": "Resim",
+            "type_name": "JPG",
+            "is_previewable": false
+        },
+        {
+            "id": 40,
+            "name": "kurtarilan_jpg_40.jpg",
+            "offset": 99696735,
+            "size": 46305,
+            "ext": ".jpg",
+            "category": "Resim",
+            "type_name": "JPG",
+            "is_previewable": false
+        },
+        {
+            "id": 41,
+            "name": "kurtarilan_jpg_41.jpg",
+            "offset": 104306375,
+            "size": 30287,
+            "ext": ".jpg",
+            "category": "Resim",
+            "type_name": "JPG",
+            "is_previewable": false
+        },
+        {
+            "id": 42,
+            "name": "kurtarilan_png_42.png",
+            "offset": 106692666,
+            "size": 1938,
+            "ext": ".png",
+            "category": "Resim",
+            "type_name": "PNG",
+            "is_previewable": true
+        },
+        {
+            "id": 43,
+            "name": "kurtarilan_png_43.png",
+            "offset": 106694686,
+            "size": 4444,
+            "ext": ".png",
+            "category": "Resim",
+            "type_name": "PNG",
+            "is_previewable": true
+        },
+        {
+            "id": 44,
+            "name": "kurtarilan_png_44.png",
+            "offset": 106699210,
+            "size": 1199,
+            "ext": ".png",
+            "category": "Resim",
+            "type_name": "PNG",
+            "is_previewable": true
+        },
+        {
+            "id": 45,
+            "name": "kurtarilan_png_45.png",
+            "offset": 106700489,
+            "size": 1051,
+            "ext": ".png",
+            "category": "Resim",
+            "type_name": "PNG",
+            "is_previewable": true
+        },
+        {
+            "id": 46,
+            "name": "kurtarilan_png_46.png",
+            "offset": 106701614,
+            "size": 4444,
+            "ext": ".png",
+            "category": "Resim",
+            "type_name": "PNG",
+            "is_previewable": true
+        },
+        {
+            "id": 47,
+            "name": "kurtarilan_png_47.png",
+            "offset": 106706138,
+            "size": 2165,
+            "ext": ".png",
+            "category": "Resim",
+            "type_name": "PNG",
+            "is_previewable": true
+        },
+        {
+            "id": 48,
+            "name": "radeonsoftware7z_arsiv.zip",
+            "offset": 106708327,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 49,
+            "name": "radeonsoftware7z_arsiv.zip",
+            "offset": 107467498,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 50,
+            "name": "radeonsoftwareADDL_COMMON_arsiv.zip",
+            "offset": 107690045,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 51,
+            "name": "radeonsoftwareamddmlfilters_arsiv.zip",
+            "offset": 108156026,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 52,
+            "name": "radeonsoftwareAMDIdentifyWindow_arsiv.zip",
+            "offset": 108393297,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 53,
+            "name": "radeonsoftwareAMDLink_arsiv.zip",
+            "offset": 108409967,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 54,
+            "name": "kurtarilan_jpg_54.jpg",
+            "offset": 110209357,
+            "size": 28357,
+            "ext": ".jpg",
+            "category": "Resim",
+            "type_name": "JPG",
+            "is_previewable": false
+        },
+        {
+            "id": 55,
+            "name": "radeonsoftwareamdlinkremoteserver_arsiv.zip",
+            "offset": 112565724,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 56,
+            "name": "radeonsoftwareamdow_arsiv.zip",
+            "offset": 112763030,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 57,
+            "name": "radeonsoftwareAMDRSServ_arsiv.zip",
+            "offset": 112789627,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 58,
+            "name": "radeonsoftwareAMDRSSrcExt_arsiv.zip",
+            "offset": 113820606,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 59,
+            "name": "radeonsoftwareamf-component-ffmpeg64_arsiv.zip",
+            "offset": 114337316,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 60,
+            "name": "radeonsoftwareamf-component-ring-buffer64_arsiv.zip",
+            "offset": 114626032,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 61,
+            "name": "radeonsoftwareatiacm64_arsiv.zip",
+            "offset": 114844004,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 62,
+            "name": "radeonsoftwareatiacmLocalisation_arsiv.zip",
+            "offset": 115268547,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 63,
+            "name": "radeonsoftwareATISetup_arsiv.zip",
+            "offset": 115270463,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 64,
+            "name": "radeonsoftwareavcodec-58_arsiv.zip",
+            "offset": 116351096,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 65,
+            "name": "kurtarilan_jpg_65.jpg",
+            "offset": 118369242,
+            "size": 64169,
+            "ext": ".jpg",
+            "category": "Resim",
+            "type_name": "JPG",
+            "is_previewable": false
+        },
+        {
+            "id": 66,
+            "name": "kurtarilan_jpg_66.jpg",
+            "offset": 122464953,
+            "size": 32207,
+            "ext": ".jpg",
+            "category": "Resim",
+            "type_name": "JPG",
+            "is_previewable": false
+        },
+        {
+            "id": 67,
+            "name": "kurtarilan_jpg_67.jpg",
+            "offset": 122813074,
+            "size": 114945,
+            "ext": ".jpg",
+            "category": "Resim",
+            "type_name": "JPG",
+            "is_previewable": false
+        },
+        {
+            "id": 68,
+            "name": "kurtarilan_jpg_68.jpg",
+            "offset": 126622602,
+            "size": 60707,
+            "ext": ".jpg",
+            "category": "Resim",
+            "type_name": "JPG",
+            "is_previewable": false
+        },
+        {
+            "id": 69,
+            "name": "radeonsoftwareavdevice-58_arsiv.zip",
+            "offset": 127279325,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 70,
+            "name": "radeonsoftwareavfilter-7_arsiv.zip",
+            "offset": 127590387,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 71,
+            "name": "radeonsoftwareavformat-58_arsiv.zip",
+            "offset": 129273373,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 72,
+            "name": "radeonsoftwareavresample-4_arsiv.zip",
+            "offset": 132716250,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 73,
+            "name": "radeonsoftwareavutil-56_arsiv.zip",
+            "offset": 132982969,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 74,
+            "name": "radeonsoftwareawvrrt64_arsiv.zip",
+            "offset": 133579924,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 75,
+            "name": "kurtarilan_png_75.png",
+            "offset": 134604181,
+            "size": 104857600,
+            "ext": ".png",
+            "category": "Resim",
+            "type_name": "PNG",
+            "is_previewable": true
+        },
+        {
+            "id": 76,
+            "name": "radeonsoftwareD3Dcompiler_47_arsiv.zip",
+            "offset": 136665334,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 77,
+            "name": "radeonsoftwareDuplicateDesktop_arsiv.zip",
+            "offset": 138585955,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 78,
+            "name": "radeonsoftwaredvrres_cs_arsiv.zip",
+            "offset": 138613348,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 79,
+            "name": "radeonsoftwaredvrres_da_DK_arsiv.zip",
+            "offset": 138625059,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 80,
+            "name": "radeonsoftwaredvrres_de_arsiv.zip",
+            "offset": 138636531,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 81,
+            "name": "radeonsoftwaredvrres_el_GR_arsiv.zip",
+            "offset": 138648160,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 82,
+            "name": "radeonsoftwaredvrres_en_US_arsiv.zip",
+            "offset": 138660021,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 83,
+            "name": "radeonsoftwaredvrres_es_ES_arsiv.zip",
+            "offset": 138671579,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 84,
+            "name": "radeonsoftwaredvrres_fi_FI_arsiv.zip",
+            "offset": 138683114,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 85,
+            "name": "radeonsoftwaredvrres_fr_FR_arsiv.zip",
+            "offset": 138694659,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 86,
+            "name": "radeonsoftwaredvrres_hu_HU_arsiv.zip",
+            "offset": 138706320,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 87,
+            "name": "radeonsoftwaredvrres_it_IT_arsiv.zip",
+            "offset": 138718062,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 88,
+            "name": "radeonsoftwaredvrres_ja_arsiv.zip",
+            "offset": 138729674,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 89,
+            "name": "radeonsoftwaredvrres_ko_KR_arsiv.zip",
+            "offset": 138740917,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 90,
+            "name": "radeonsoftwaredvrres_nl_NL_arsiv.zip",
+            "offset": 138752093,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 91,
+            "name": "radeonsoftwaredvrres_no_arsiv.zip",
+            "offset": 138763641,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 92,
+            "name": "radeonsoftwaredvrres_pl_arsiv.zip",
+            "offset": 138775086,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 93,
+            "name": "radeonsoftwaredvrres_pt_BR_arsiv.zip",
+            "offset": 138786800,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 94,
+            "name": "radeonsoftwaredvrres_ru_RU_arsiv.zip",
+            "offset": 138798364,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 95,
+            "name": "radeonsoftwaredvrres_sv_SE_arsiv.zip",
+            "offset": 138810137,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 96,
+            "name": "radeonsoftwaredvrres_th_arsiv.zip",
+            "offset": 138821516,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 97,
+            "name": "radeonsoftwaredvrres_tr_TR_arsiv.zip",
+            "offset": 138833055,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 98,
+            "name": "radeonsoftwaredvrres_uk_UA_arsiv.zip",
+            "offset": 138844568,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 99,
+            "name": "radeonsoftwaredvrres_zh_CN_arsiv.zip",
+            "offset": 138856644,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 100,
+            "name": "radeonsoftwaredvrres_zh_TW_arsiv.zip",
+            "offset": 138867532,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 101,
+            "name": "radeonsoftwaredxcompiler_arsiv.zip",
+            "offset": 138878387,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 102,
+            "name": "kurtarilan_jpg_102.jpg",
+            "offset": 147765160,
+            "size": 37,
+            "ext": ".jpg",
+            "category": "Resim",
+            "type_name": "JPG"
+        },
+        {
+            "id": 103,
+            "name": "radeonsoftwaregpuup_arsiv.zip",
+            "offset": 147861774,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 104,
+            "name": "radeonsoftwareLauncherRSXRuntime_arsiv.zip",
+            "offset": 148003278,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 105,
+            "name": "radeonsoftwarelibEGL_arsiv.zip",
+            "offset": 148024058,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 106,
+            "name": "radeonsoftwarelibGLESv2_arsiv.zip",
+            "offset": 148039274,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 107,
+            "name": "radeonsoftwarelinkresources_arsiv.zip",
+            "offset": 149355264,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 108,
+            "name": "kurtarilan_jpg_108.jpg",
+            "offset": 154641431,
+            "size": 26103,
+            "ext": ".jpg",
+            "category": "Resim",
+            "type_name": "JPG"
+        },
+        {
+            "id": 109,
+            "name": "radeonsoftwarelocalisationcsCNext_cs_arsiv.zip",
+            "offset": 156293568,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 110,
+            "name": "radeonsoftwarelocalisationcsCNext_EMBD_cs_arsiv.zip",
+            "offset": 156452246,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 111,
+            "name": "radeonsoftwarelocalisationcsCNext_WS_cs_arsiv.zip",
+            "offset": 156648990,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 112,
+            "name": "radeonsoftwarelocalisationcsLink_cs_arsiv.zip",
+            "offset": 156846316,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 113,
+            "name": "radeonsoftwarelocalisationda_DKCNext_da_DK_arsiv.zip",
+            "offset": 156865562,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 114,
+            "name": "radeonsoftwarelocalisationda_DKCNext_EMBD_da_DK_arsiv.zip",
+            "offset": 157018820,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 115,
+            "name": "radeonsoftwarelocalisationda_DKCNext_WS_da_DK_arsiv.zip",
+            "offset": 157207564,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 116,
+            "name": "radeonsoftwarelocalisationda_DKLink_da_DK_arsiv.zip",
+            "offset": 157397672,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 117,
+            "name": "radeonsoftwarelocalisationdeCNext_de_arsiv.zip",
+            "offset": 157415962,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 118,
+            "name": "radeonsoftwarelocalisationdeCNext_EMBD_de_arsiv.zip",
+            "offset": 157572317,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 119,
+            "name": "radeonsoftwarelocalisationdeCNext_WS_de_arsiv.zip",
+            "offset": 157768941,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 120,
+            "name": "radeonsoftwarelocalisationdeLink_de_arsiv.zip",
+            "offset": 157966322,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 121,
+            "name": "radeonsoftwarelocalisationea_ESLink_es_ES_arsiv.zip",
+            "offset": 157985673,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 122,
+            "name": "radeonsoftwarelocalisationel_GRCNext_el_GR_arsiv.zip",
+            "offset": 158004599,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 123,
+            "name": "radeonsoftwarelocalisationel_GRCNext_EMBD_el_GR_arsiv.zip",
+            "offset": 158172839,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 124,
+            "name": "radeonsoftwarelocalisationel_GRCNext_WS_el_GR_arsiv.zip",
+            "offset": 158384055,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 125,
+            "name": "radeonsoftwarelocalisationel_GRLink_el_GR_arsiv.zip",
+            "offset": 158597661,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 126,
+            "name": "radeonsoftwarelocalisationen_USCNext_CRTR_en_US_arsiv.zip",
+            "offset": 158618035,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 127,
+            "name": "radeonsoftwarelocalisationen_USCNext_EMBD_en_US_arsiv.zip",
+            "offset": 158623354,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 128,
+            "name": "radeonsoftwarelocalisationen_USCNext_WS_en_US_arsiv.zip",
+            "offset": 158632567,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 129,
+            "name": "radeonsoftwarelocalisationes_ESCNext_EMBD_es_ES_arsiv.zip",
+            "offset": 158642618,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 130,
+            "name": "radeonsoftwarelocalisationes_ESCNext_es_ES_arsiv.zip",
+            "offset": 158836966,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 131,
+            "name": "radeonsoftwarelocalisationes_ESCNext_WS_es_ES_arsiv.zip",
+            "offset": 158992572,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 132,
+            "name": "radeonsoftwarelocalisationfi_FICNext_EMBD_fi_FI_arsiv.zip",
+            "offset": 159188248,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        },
+        {
+            "id": 133,
+            "name": "radeonsoftwarelocalisationfi_FICNext_fi_FI_arsiv.zip",
+            "offset": 159377976,
+            "size": 1048576,
+            "ext": ".zip",
+            "category": "Ar\u015fiv",
+            "type_name": "ZIP"
+        }
+    ],
+    "elapsed_seconds": 48.774346113204956
+}
