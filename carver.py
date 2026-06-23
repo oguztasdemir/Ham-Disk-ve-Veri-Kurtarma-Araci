@@ -445,12 +445,27 @@ def scan_disk_worker(app_instance, drive_path, signatures):
                                 # Try to extract the original filename from the first 2KB of raw bytes
                                 extracted_name = None
                                 is_previewable = False
+                                file_ext = sig["ext"]
+                                file_category = sig["category"]
+                                
                                 try:
                                     header_bytes = read_raw_bytes_shared(disk, absolute_start_offset, 2048, worker_lock)
                                     extracted_name = extract_filename_from_bytes(header_bytes, sig["ext"])
                                     
+                                    # If it's a zip, detect if it's actually an MS Office document
+                                    if sig["ext"] == ".zip" and header_bytes.startswith(b"PK\x03\x04"):
+                                        if b"word/" in header_bytes:
+                                            file_ext = ".docx"
+                                            file_category = "Belge"
+                                        elif b"xl/" in header_bytes:
+                                            file_ext = ".xlsx"
+                                            file_category = "Belge"
+                                        elif b"ppt/" in header_bytes:
+                                            file_ext = ".pptx"
+                                            file_category = "Belge"
+                                    
                                     # Validate previewable state using the already loaded header bytes
-                                    if sig["ext"] in [".jpg", ".jpeg", ".png"]:
+                                    if file_ext in [".jpg", ".jpeg", ".png"]:
                                         try:
                                             import io
                                             from PIL import Image
@@ -465,23 +480,23 @@ def scan_disk_worker(app_instance, drive_path, signatures):
                                     app_instance.total_recovered_count += 1
                                     file_count = app_instance.total_recovered_count
                                     
-                                fmt_name = sig["ext"].replace(".", "").lower()
+                                fmt_name = file_ext.replace(".", "").lower()
                                 
                                 if original_meta:
                                     name_val = original_name
                                 elif extracted_name:
-                                    name_val = f"{extracted_name}{sig['ext']}"
+                                    name_val = f"{extracted_name}{file_ext}"
                                 else:
-                                    name_val = f"kurtarilan_{fmt_name}_{file_count}{sig['ext']}"
+                                    name_val = f"kurtarilan_{fmt_name}_{file_count}{file_ext}"
                                     
                                 file_meta = {
                                     "id": file_count,
                                     "name": name_val,
                                     "offset": absolute_start_offset,
                                     "size": file_len,
-                                    "ext": sig["ext"],
-                                    "category": sig["category"],
-                                    "type_name": sig["ext"].replace(".", "").upper(),
+                                    "ext": file_ext,
+                                    "category": file_category,
+                                    "type_name": file_ext.replace(".", "").upper(),
                                     "is_previewable": is_previewable
                                 }
                                 app_instance.msg_queue.put(("recovered_file_meta", file_meta))

@@ -30,6 +30,9 @@ class LayoutMixin:
         
         self.dash_btn = tk.Button(sidebar, text="📊 Gösterge Tablosu", command=self.show_dashboard_view, bg=self.sidebar_bg, fg=self.text_dark, activebackground="#E4E5EA", activeforeground=self.text_dark, borderwidth=0, anchor="w", padx=20, pady=10, font=("Segoe UI", 10, "bold"))
         self.dash_btn.pack(fill=tk.X)
+
+        self.help_btn = tk.Button(sidebar, text="❓ Nasıl Çalışır / Yardım", command=self.show_help_window, bg=self.sidebar_bg, fg=self.text_dark, activebackground="#E4E5EA", activeforeground=self.text_dark, borderwidth=0, anchor="w", padx=20, pady=10, font=("Segoe UI", 10, "bold"))
+        self.help_btn.pack(fill=tk.X)
         
         tk.Label(sidebar, text="Sonuçlar", bg=self.sidebar_bg, fg=self.text_gray, font=("Segoe UI", 9, "bold")).pack(anchor="w", padx=20, pady=(20, 5))
         
@@ -542,6 +545,93 @@ class LayoutMixin:
             "tarayabilen ticari derin tarama yazılımlarını (Recuva, EaseUS Data Recovery Wizard veya Disk Drill gibi) kullanabilirsiniz."
         )
         messagebox.showinfo("Orijinal Klasör Yapısı Hakkında", info_text)
+
+    def show_help_window(self):
+        help_win = tk.Toplevel(self)
+        help_win.title("Nasıl Çalışır & Bilgi Kılavuzu")
+        help_win.geometry("800x600")
+        help_win.configure(bg="#1E1E24")
+        help_win.transient(self)
+        
+        # A beautiful header
+        header_frame = tk.Frame(help_win, bg="#0084FF", pady=15)
+        header_frame.pack(fill=tk.X)
+        
+        title_lbl = tk.Label(header_frame, text="🛠️ Disk Drill - Profesyonel Veri Kurtarma Kılavuzu", bg="#0084FF", fg="#FFFFFF", font=("Segoe UI", 14, "bold"))
+        title_lbl.pack()
+        
+        subtitle_lbl = tk.Label(header_frame, text="Uygulama Çalışma Mantığı ve Gelişmiş Algoritmalar", bg="#0084FF", fg="#E4E5EA", font=("Segoe UI", 9, "italic"))
+        subtitle_lbl.pack()
+        
+        # Notebook for tabbed guide
+        notebook = ttk.Notebook(help_win)
+        notebook.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        
+        # Styling Notebook
+        style = ttk.Style()
+        style.configure("TNotebook", background="#1E1E24", borderwidth=0)
+        style.configure("TNotebook.Tab", background="#2F3542", foreground="#2F3542", font=("Segoe UI", 9, "bold"), padding=[15, 5])
+        
+        # Tab 1: File Carving
+        tab1 = tk.Frame(notebook, bg="#FFFFFF", padx=20, pady=20)
+        notebook.add(tab1, text="Dosya Oymacılığı (Carving)")
+        
+        t1_text = (
+            "📌 File Carving (Dosya Oymacılığı) Nedir?\n\n"
+            "Diskiniz hızlı biçimlendirildiğinde veya dosya sistemi (MFT, FAT) çöktüğünde, işletim sistemi dosyaların konumlarını ve isimlerini bulamaz. "
+            "Ancak verinin kendisi disk üzerinde fiziksel olarak durmaya devam eder.\n\n"
+            "File Carving yöntemi, disk üzerindeki her sektörü sırayla tarar ve dosyalara ait bilinen 'Magic Bytes' (imza) yapılarını arar:\n"
+            "  • JPEG resimleri: FF D8 FF ile başlar, FF D9 ile biter.\n"
+            "  • PNG resimleri: 89 50 4E 47 ile başlar.\n"
+            "  • PDF belgeleri: %PDF- ile başlar, %%EOF ile biter.\n\n"
+            "Program bu imzaları bulduğunda veriyi ham sektörlerden kopyalar ve yeni bir dosya olarak kurtarır."
+        )
+        tk.Label(tab1, text=t1_text, bg="#FFFFFF", fg="#2F3542", font=("Segoe UI", 10), justify="left", anchor="nw", wraplength=720).pack(fill=tk.BOTH, expand=True)
+        
+        # Tab 2: Neden Klasör İsimleri Yok
+        tab2 = tk.Frame(notebook, bg="#FFFFFF", padx=20, pady=20)
+        notebook.add(tab2, text="Klasör Yapıları & İsimler")
+        
+        t2_text = (
+            "📌 Klasör İsimleri ve Orijinal Klasör Yapısı Neden Kurtarılamaz?\n\n"
+            "Dosya adları, oluşturulma tarihleri ve klasör hiyerarşisi diskteki indeks tablolarında (örneğin NTFS'teki MFT - Master File Table) tutulur.\n\n"
+            "Eğer disk biçimlendirilmişse bu tablolar temizlenmiştir. Dosya Oymacılığı sadece ham veriyi kurtarabilir. Bu yüzden dosyaların adları 'kurtarilan_resim_1.jpg' gibi otomatik üretilir.\n\n"
+            "💡 Disk Drill Çözümü (Sanal Klasörleme):\n"
+            "Bu eksikliği gidermek için programda 'Sanal Klasörleme' sistemi mevcuttur. Kurtarmak istediğiniz dosyaları arayüzde 'Klasöre Taşı' butonunu kullanarak organize edebilir, kendi klasör yapınızı bilgisayara kaydetmeden önce oluşturabilirsiniz."
+        )
+        tk.Label(tab2, text=t2_text, bg="#FFFFFF", fg="#2F3542", font=("Segoe UI", 10), justify="left", anchor="nw", wraplength=720).pack(fill=tk.BOTH, expand=True)
+        
+        # Tab 3: Performans ve Çoklu Motor
+        tab3 = tk.Frame(notebook, bg="#FFFFFF", padx=20, pady=20)
+        notebook.add(tab3, text="Çoklu Motor & Performans")
+        
+        t3_text = (
+            "📌 Paralel Motorlarla Tarama (Concurrent Multi-threading)\n\n"
+            "Programımız, diski bağımsız parçalara (örneğin 100 GB'lık bölümlere) ayırarak her bölümü farklı bir iş parçacığının (thread) taramasını sağlar. "
+            "Bu sayede donanım limitlerindeki hızlara ulaşılır.\n\n"
+            "Tavsiye Edilen Motor Sayıları:\n"
+            "  • Mekanik Sabit Diskler (HDD): 1 veya 2 Motor. Disk kafası fiziksel olarak seek/read yaptığı için çok fazla thread diski yavaşlatır.\n"
+            "  • SSD ve NVMe Sürücüler: 4 ile 8 Motor arası. Eşzamanlı okuma kapasiteleri çok yüksek olduğundan tarama süresi ciddi şekilde kısalır.\n"
+            "  • Özel Aralık Taraması: Sadece belirli bir disk bölgesinde (Örn: 200. GB ile 300. GB arası) tarama yaparak saatler kazanabilirsiniz."
+        )
+        tk.Label(tab3, text=t3_text, bg="#FFFFFF", fg="#2F3542", font=("Segoe UI", 10), justify="left", anchor="nw", wraplength=720).pack(fill=tk.BOTH, expand=True)
+        
+        # Tab 4: Otomatik Onarım ve Dosya Analizi
+        tab4 = tk.Frame(notebook, bg="#FFFFFF", padx=20, pady=20)
+        notebook.add(tab4, text="Otomatik Dosya Onarımı")
+        
+        t4_text = (
+            "📌 Gelişmiş Dosya Tamir Mekanizmaları\n\n"
+            "Kurtarılan dosyaların çoğu disk üzerindeki bozulmalar nedeniyle açılmayabilir. Sistemimiz arka planda şu onarımları gerçekleştirir:\n\n"
+            "  🛠️ JPEG Onarımı:\n"
+            "  Sektör hizalamalarından kaynaklanan fazlalık boşlukları (null padding) temizler ve eksik bitiş imzasını (FFD9) otomatik ekleyerek resmin yarıda kesilmesini veya açılmamasını önler.\n\n"
+            "  🛠️ MP4 Video Onarımı (Annex B Ayıklama):\n"
+            "  Biçimlendirilen videolarda 'moov atom' kaybolur ve oynatıcılar videoyu açamaz. Programımız ham video karelerini (byte stream) tarayarak çalışabilir bir '.h264' video akışı ayıklar."
+        )
+        tk.Label(tab4, text=t4_text, bg="#FFFFFF", fg="#2F3542", font=("Segoe UI", 10), justify="left", anchor="nw", wraplength=720).pack(fill=tk.BOTH, expand=True)
+        
+        close_btn = tk.Button(help_win, text="Kapat", command=help_win.destroy, bg="#2F3542", fg="#FFFFFF", borderwidth=0, padx=20, pady=8, font=("Segoe UI", 9, "bold"))
+        close_btn.pack(pady=10)
 
     def select_output_directory(self):
         import os

@@ -57,5 +57,11 @@ FILE_SIGNATURES = {
         "footer": None,
         "ext": ".mp4",
         "category": "Videolar"
+    },
+    "MP3 Ses Dosyası (*.mp3)": {
+        "header": b"ID3",
+        "footer": None,
+        "ext": ".mp3",
+        "category": "Ses"
     }
 }

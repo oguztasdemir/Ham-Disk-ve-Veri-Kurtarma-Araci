@@ -35,11 +35,15 @@ Hızlı biçimlendirilmiş (Quick Formatted) veya dosya yapısı bozulmuş diskl
   - Bölümleme Tablosu Stili (GPT / MBR)
   - Gerçek Kapasite değerleri anlık olarak sorgulanır ve gösterge panelinde listelenir.
 
-### 6. 🛠️ Otomatik Dosya Onarımı (Auto-Repair & Stream Extractor)
+### 6. 🛠️ Gelişmiş Otomatik Dosya Onarımı (Auto-Repair & Stream Extractor)
 - **JPEG/JPG**: Sektör hizalaması nedeniyle oluşan null padding'ler temizlenir, eksik footer (`FFD9`) imzası otomatik tamamlanarak resimlerin bozulması önlenir.
 - **MP4**: `moov` kutusu eksik olduğu için oynatılamayan videolarda, ham video kareleri (Annex B byte stream) ayıklanarak oynatılabilir `.h264` akışına dönüştürülür.
+- **Office Belgeleri (.docx, .xlsx, .pptx)**: Disk üzerinde ZIP arşivi olarak bulunan yapılar analiz edilir; içeriklerinde MS Office imzaları (`word/`, `xl/`, `ppt/`) saptanırsa otomatik olarak ilgili Office formatına dönüştürülüp `Belge` kategorisine atanır.
 
-### 7. 🔌 Tak-Çalıştır ve Sıfır Kurulum (Zero-Config Portability)
+### 7. 📖 Entegre Nasıl Çalışır & Yardım Kılavuzu
+- Kullanıcıların veri kurtarma mantığını, donanım limitlerini (HDD ve SSD için thread yapılandırması) ve dosya tamir mekanizmalarını görebileceği profesyonel, sekmeli bir yardım kılavuzu arayüzü sunar.
+
+### 8. 🔌 Tak-Çalıştır ve Sıfır Kurulum (Zero-Config Portability)
 - Program açılırken `Pillow` kütüphanesinin yüklü olup olmadığını otomatik olarak kontrol eder. Kütüphane eksik ise arka planda otomatik olarak `pip` ile kurarak programın hatasız açılmasını sağlar.
 
 ---
