@@ -10,9 +10,11 @@ def is_admin():
 
 def run_as_admin():
     if not is_admin():
+        import os
+        script_dir = os.path.dirname(os.path.abspath(__file__))
         # Relaunch the script with admin rights
         ctypes.windll.shell32.ShellExecuteW(
-            None, "runas", sys.executable, " ".join([f'"{arg}"' for arg in sys.argv]), None, 1
+            None, "runas", sys.executable, " ".join([f'"{arg}"' for arg in sys.argv]), script_dir, 1
         )
         sys.exit(0)
 
@@ -52,6 +54,7 @@ def enforce_single_instance():
 
 def check_dependencies():
     import sys
+    # Check Pillow
     try:
         from PIL import Image, ImageTk
     except ImportError:
@@ -59,11 +62,25 @@ def check_dependencies():
         try:
             print("Gerekli kütüphaneler kuruluyor (Pillow)...")
             subprocess.check_call([sys.executable, "-m", "pip", "install", "Pillow"])
-            print("Kurulum başarılı!")
+            print("Pillow kurulumu başarılı!")
         except Exception as e:
-            print(f"Kütüphane kurulumu sırasında hata oluştu: {e}")
+            print(f"Pillow kurulumu sırasında hata oluştu: {e}")
+
+    # Check moviepy
+    try:
+        import moviepy
+    except ImportError:
+        import subprocess
+        try:
+            print("Gerekli kütüphaneler kuruluyor (moviepy)...")
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "moviepy"])
+            print("moviepy kurulumu başarılı!")
+        except Exception as e:
+            print(f"moviepy kurulumu sırasında hata oluştu: {e}")
 
 if __name__ == "__main__":
+    import os
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     enforce_single_instance()
     run_as_admin()
     hide_console()

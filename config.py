@@ -1,5 +1,10 @@
 # config.py
 
+# Project Metadata Configuration
+APP_NAME = "NovaRecovery"
+APP_VERSION = "2.1.0"
+APP_DESCRIPTION = "Profesyonel Veri Kurtarma ve File Carver Yazılımı"
+
 # Dark Theme Colors matching Disk Drill style
 BG_DARK = "#1E1E24"
 SIDEBAR_BG = "#F1F2F6"
@@ -34,6 +39,36 @@ FILE_SIGNATURES = {
         "ext": ".png",
         "category": "Resim"
     },
+    "GIF Görsel (*.gif)": {
+        "header": b"GIF8",
+        "footer": b"\x3b",
+        "ext": ".gif",
+        "category": "Resim"
+    },
+    "BMP Görsel (*.bmp)": {
+        "header": b"BM",
+        "footer": None,
+        "ext": ".bmp",
+        "category": "Resim"
+    },
+    "WebP Görsel (*.webp)": {
+        "header": b"RIFF",
+        "footer": None,
+        "ext": ".webp",
+        "category": "Resim"
+    },
+    "TIFF Görsel (Intel) (*.tiff)": {
+        "header": b"II*\x00",
+        "footer": None,
+        "ext": ".tiff",
+        "category": "Resim"
+    },
+    "TIFF Görsel (Motorola) (*.tiff)": {
+        "header": b"MM\x00*",
+        "footer": None,
+        "ext": ".tiff",
+        "category": "Resim"
+    },
     "PDF Belgesi (*.pdf)": {
         "header": b"%PDF-",
         "footer": b"%%EOF",
@@ -52,10 +87,40 @@ FILE_SIGNATURES = {
         "ext": ".rar",
         "category": "Arşiv"
     },
+    "7Z Arşivi (*.7z)": {
+        "header": b"7z\xbc\xaf\x27\x1c",
+        "footer": None,
+        "ext": ".7z",
+        "category": "Arşiv"
+    },
     "MP4 Video (*.mp4)": {
         "header": b"ftyp",
         "footer": None,
         "ext": ".mp4",
+        "category": "Videolar"
+    },
+    "MKV Video (*.mkv)": {
+        "header": b"\x1a\x45\xdf\xa3",
+        "footer": None,
+        "ext": ".mkv",
+        "category": "Videolar"
+    },
+    "AVI Video (*.avi)": {
+        "header": b"RIFF",
+        "footer": None,
+        "ext": ".avi",
+        "category": "Videolar"
+    },
+    "MOV Video (*.mov)": {
+        "header": b"ftyp",
+        "footer": None,
+        "ext": ".mov",
+        "category": "Videolar"
+    },
+    "WebM Video (*.webm)": {
+        "header": b"\x1a\x45\xdf\xa3",
+        "footer": None,
+        "ext": ".webm",
         "category": "Videolar"
     },
     "MP3 Ses Dosyası (*.mp3)": {
@@ -63,5 +128,24 @@ FILE_SIGNATURES = {
         "footer": None,
         "ext": ".mp3",
         "category": "Ses"
+    },
+    "WAV Ses Dosyası (*.wav)": {
+        "header": b"RIFF",
+        "footer": None,
+        "ext": ".wav",
+        "category": "Ses"
+    },
+    "FLAC Ses Dosyası (*.flac)": {
+        "header": b"fLaC",
+        "footer": None,
+        "ext": ".flac",
+        "category": "Ses"
+    },
+    "M4A Ses Dosyası (*.m4a)": {
+        "header": b"ftyp",
+        "footer": None,
+        "ext": ".m4a",
+        "category": "Ses"
     }
 }
+

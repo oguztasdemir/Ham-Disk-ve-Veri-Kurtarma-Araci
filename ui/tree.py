@@ -97,7 +97,7 @@ class TreeMixin:
             if f.get("custom_path"):
                 path_components = [p.strip() for p in re.split(r'[/\\]', f["custom_path"]) if p.strip()]
             else:
-                path_components = [f["category"], self.get_size_group_name(f["size"])]
+                path_components = [f["category"]]
             
             for i in range(1, len(path_components) + 1):
                 ancestor = tuple(path_components[:i])
@@ -126,23 +126,70 @@ class TreeMixin:
             self.folder_nodes[path_tuple] = node_id
             return node_id
 
-        # Insert files
+        # Cancel any previous active tree rendering loop to avoid concurrency issues
+        if hasattr(self, "_tree_render_after_id") and self._tree_render_after_id:
+            try:
+                self.after_cancel(self._tree_render_after_id)
+            except:
+                pass
+            self._tree_render_after_id = None
+
+        # Group files by parent folder
+        files_by_folder = {}
         for f in filtered_files:
             if f.get("custom_path"):
                 path_components = [p.strip() for p in re.split(r'[/\\]', f["custom_path"]) if p.strip()]
             else:
-                path_components = [f["category"], self.get_size_group_name(f["size"])]
+                path_components = [f["category"]]
                 
-            parent_node = get_or_create_folder_node(tuple(path_components))
-            size_str = self.format_size(f["size"])
+            path_tuple = tuple(path_components)
+            files_by_folder.setdefault(path_tuple, []).append(f)
             
-            file_node = self.file_tree.insert(
-                parent_node, 
-                "end", 
-                text=f["name"], 
-                values=("Yüksek", "-", self.get_preview_status(f), f"{f['type_name']} Dosyası", size_str, f"Ofset {f['offset']}")
-            )
-            self.tree_item_map[file_node] = f
+        # Create folder nodes first (very fast) and build tasks list
+        tasks = []
+        for path_tuple, files in files_by_folder.items():
+            parent_node = get_or_create_folder_node(path_tuple)
+            
+            if len(files) > 100:
+                chunk_size = 100
+                for j in range(0, len(files), chunk_size):
+                    chunk = files[j : j + chunk_size]
+                    part_num = (j // chunk_size) + 1
+                    part_start = j + 1
+                    part_end = min(j + chunk_size, len(files))
+                    
+                    part_node = self.file_tree.insert(
+                        parent_node, 
+                        "end", 
+                        text=f"📁 Part {part_num} ({part_start}-{part_end})", 
+                        values=("-", "-", "-", "Klasör", "-", "-"), 
+                        open=False
+                    )
+                    tasks.append((part_node, chunk))
+            else:
+                tasks.append((parent_node, files))
+                
+        # Batch insert helper
+        def run_insert_batch(task_idx=0):
+            if task_idx >= len(tasks):
+                self._tree_render_after_id = None
+                return
+                
+            node, chunk = tasks[task_idx]
+            for f in chunk:
+                size_str = self.format_size(f["size"])
+                offset_mb = f["offset"] / (1024 * 1024)
+                file_node = self.file_tree.insert(
+                    node, 
+                    "end", 
+                    text=f["name"], 
+                    values=("Yüksek", f.get("date", "-"), self.get_preview_status(f), f"{f['type_name']} Dosyası", size_str, f"Ofset {f['offset']} ({offset_mb:.2f} MB)")
+                )
+                self.tree_item_map[file_node] = f
+                
+            self._tree_render_after_id = self.after(5, lambda: run_insert_batch(task_idx + 1))
+            
+        run_insert_batch(0)
 
     def get_size_group_name(self, size_bytes):
         if size_bytes < 100 * 1024:
@@ -155,108 +202,7 @@ class TreeMixin:
             return "Çok Büyük (10MB üstü)"
 
     def add_file_to_tree_view(self, f):
-        hide = self.hide_non_previewable.get()
-        cat_filter = self.selected_category_filter
-        
-        if cat_filter != "All" and f["category"] != cat_filter:
-            return
-        if hide:
-            if self.get_preview_status(f) != "Önizlenebildi":
-                return
-                
-        if f.get("custom_path"):
-            path_components = [p.strip() for p in re.split(r'[/\\]', f["custom_path"]) if p.strip()]
-        else:
-            path_components = [f["category"], self.get_size_group_name(f["size"])]
-            
-        if not hasattr(self, "folder_nodes") or self.folder_nodes is None:
-            self.folder_nodes = {}
-        if not hasattr(self, "folder_stats") or self.folder_stats is None:
-            self.folder_stats = {}
-            
-        if not self.tree_reconstructed_node:
-            self.folder_nodes.clear()
-            self.folder_stats.clear()
-            
-        if not hide:
-            if cat_filter == "All":
-                total_files = self.total_recovered_count
-                total_bytes = self.total_recovered_size
-            else:
-                total_files = self.category_counts.get(cat_filter, 0)
-                total_bytes = self.category_sizes.get(cat_filter, 0)
-            total_size_str = self.format_size(total_bytes)
-        else:
-            filtered_files = []
-            for x in self.virtual_files:
-                if cat_filter != "All" and x["category"] != cat_filter:
-                    continue
-                if self.get_preview_status(x) != "Önizlenebildi":
-                    continue
-                filtered_files.append(x)
-            total_files = len(filtered_files)
-            total_bytes = sum(x["size"] for x in filtered_files)
-            total_size_str = self.format_size(total_bytes)
-            
-        # 0. Check or create Root Reconstructed Node
-        if not self.tree_reconstructed_node:
-            self.tree_reconstructed_node = self.file_tree.insert(
-                "", "end", 
-                text=f"Yeniden inşa edildi ({total_files}) - {total_size_str}", 
-                values=("-", "-", "-", "Klasör", total_size_str, "-"),
-                open=True
-            )
-        else:
-            self.file_tree.item(
-                self.tree_reconstructed_node, 
-                text=f"Yeniden inşa edildi ({total_files}) - {total_size_str}",
-                values=("-", "-", "-", "Klasör", total_size_str, "-")
-            )
-            
-        # Recursive update/create folder nodes and stats
-        def get_or_create_folder_node(path_tuple):
-            if not path_tuple:
-                return self.tree_reconstructed_node
-            
-            parent_tuple = path_tuple[:-1]
-            parent_node = get_or_create_folder_node(parent_tuple)
-            
-            stats = self.folder_stats.setdefault(path_tuple, {"count": 0, "size": 0})
-            stats["count"] += 1
-            stats["size"] += f["size"]
-            
-            folder_name = path_tuple[-1]
-            f_size_str = self.format_size(stats["size"])
-            
-            if path_tuple not in self.folder_nodes:
-                node_id = self.file_tree.insert(
-                    parent_node, "end",
-                    text=f"📁 {folder_name} ({stats['count']})",
-                    values=("-", "-", "-", "Klasör", f_size_str, "-"),
-                    open=True
-                )
-                self.folder_nodes[path_tuple] = node_id
-            else:
-                node_id = self.folder_nodes[path_tuple]
-                self.file_tree.item(
-                    node_id,
-                    text=f"📁 {folder_name} ({stats['count']})",
-                    values=("-", "-", "-", "Klasör", f_size_str, "-")
-                )
-            return node_id
-            
-        parent_node = get_or_create_folder_node(tuple(path_components))
-        
-        # 3. File Node
-        size_str = self.format_size(f["size"])
-        
-        file_node = self.file_tree.insert(
-            parent_node, 
-            "end", 
-            text=f["name"], 
-            values=("Yüksek", "-", self.get_preview_status(f), f"{f['type_name']} Dosyası", size_str, f"Ofset {f['offset']}")
-        )
-        self.tree_item_map[file_node] = f
+        self.tree_needs_update = True
 
     def move_selected_to_folder(self):
         selected_files = self.get_selected_virtual_files()
