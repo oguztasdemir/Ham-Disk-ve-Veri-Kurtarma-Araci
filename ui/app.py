@@ -59,7 +59,7 @@ class RecoveryApp(tk.Tk, DrivesMixin, ScanMixin, PreviewMixin, ExportMixin, Tree
         sys.stderr = self.redirector
 
         self.title(f"{APP_NAME} v{APP_VERSION} - Profesyonel Veri Kurtarma Paneli")
-        self.geometry("1240x780")
+        self.geometry("1320x800")
         self.configure(bg=BG_DARK)
         
         # Color & style assets

@@ -144,12 +144,13 @@ class LayoutMixin:
 
     def init_dashboard_view(self):
         # Split dashboard into Left (Controls) and Right (RAM & Log Panel)
-        self.dash_left_frame = tk.Frame(self.dashboard_view, bg=self.content_bg)
-        self.dash_left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        
+        # Pack fixed-width right frame first so it occupies its space, then left frame expands to fill remainder.
         self.dash_right_frame = tk.Frame(self.dashboard_view, bg=self.content_bg, width=280)
         self.dash_right_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=(20, 0))
         self.dash_right_frame.pack_propagate(False)
+
+        self.dash_left_frame = tk.Frame(self.dashboard_view, bg=self.content_bg)
+        self.dash_left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         
         # System performance diagnostics panel has been relocated to the middle section to prevent overlaps.
         
@@ -511,71 +512,87 @@ class LayoutMixin:
         
         self.resume_btn = tk.Button(ctrl_frame, text="DEVAM ET", command=self.resume_recovery, state="disabled", bg="#CED6E0", fg=self.text_dark, borderwidth=0, padx=15, pady=5, font=("Segoe UI", 9, "bold"))
         self.resume_btn.pack(side=tk.LEFT, padx=(0, 10))
-        
         self.backup_btn = tk.Button(ctrl_frame, text="💾 YEDEK AL", command=self.manual_backup, state="disabled", bg="#CED6E0", fg=self.text_dark, borderwidth=0, padx=15, pady=5, font=("Segoe UI", 9, "bold"))
         self.backup_btn.pack(side=tk.LEFT, padx=(0, 10))
+
+        self.bar_detail_btn = tk.Button(
+            ctrl_frame, 
+            text="🔍 Bar Detayına Git / Kuyruk Yönetimi", 
+            command=lambda: self.on_disk_map_double_click(None), 
+            bg=self.accent_blue, 
+            fg=self.text_white, 
+            borderwidth=0, 
+            padx=15, 
+            pady=5, 
+            font=("Segoe UI", 9, "bold"),
+            cursor="hand2"
+        )
+        self.bar_detail_btn.pack(side=tk.RIGHT, padx=(10, 0))
         
         self.stop_btn = tk.Button(ctrl_frame, text="TARAMAYI BİTİR", command=self.stop_recovery, state="disabled", bg="#FF4757", fg=self.text_white, borderwidth=0, padx=15, pady=5, font=("Segoe UI", 9, "bold"))
         # self.stop_btn.pack(side=tk.LEFT, padx=(0, 20)) # Removed to hide the stop button per request
         
         self.inspect_btn = tk.Button(ctrl_frame, text="🔎 Bulunan Öğeleri İnceleyin", command=self.show_file_view, bg=self.accent_blue, fg=self.text_white, borderwidth=0, padx=20, pady=5, font=("Segoe UI", 9, "bold"))
-        self.inspect_btn.pack(side=tk.RIGHT)
+        self.inspect_btn.pack(side=tk.RIGHT, padx=(10, 0))
         
         self.status_lbl = tk.Label(self.dash_left_frame, text="Hazır.", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 9))
-        self.status_lbl.pack(side=tk.BOTTOM, anchor="w")
+        self.status_lbl.pack(side=tk.BOTTOM, anchor="w", pady=(10, 0))
  
         # Dedicated Progress & Stats Frame at the bottom
         self.bottom_progress_frame = tk.Frame(self.dash_left_frame, bg=self.content_bg)
-        self.bottom_progress_frame.pack(fill=tk.X, side=tk.BOTTOM, pady=4)
+        self.bottom_progress_frame.pack(fill=tk.X, side=tk.BOTTOM, pady=10)
         
-        # Row 1: Current Scan Progress Title & Value
-        self.lbl_progress_title = tk.Label(self.bottom_progress_frame, text="Mevcut Tarama İlerlemesi:", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 9, "bold"))
+        # Split into left and right subframes to prevent vertical crowding
+        prog_left_col = tk.Frame(self.bottom_progress_frame, bg=self.content_bg)
+        prog_left_col.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 15))
+        
+        prog_right_col = tk.Frame(self.bottom_progress_frame, bg=self.content_bg)
+        prog_right_col.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(15, 0))
+        
+        # --- LEFT COLUMN (Current Scan Progress & Stats) ---
+        self.lbl_progress_title = tk.Label(prog_left_col, text="Mevcut Tarama İlerlemesi:", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 9, "bold"))
         self.lbl_progress_title.pack(anchor="w")
-        self.lbl_progress_val = tk.Label(self.bottom_progress_frame, text="-", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 9))
-        self.lbl_progress_val.pack(anchor="w")
+        self.lbl_progress_val = tk.Label(prog_left_col, text="-", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 9))
+        self.lbl_progress_val.pack(anchor="w", pady=(2, 4))
         
-        self.progress_bar = ttk.Progressbar(self.bottom_progress_frame, orient="horizontal", mode="determinate")
-        self.progress_bar.pack(fill=tk.X, pady=(2, 4))
+        self.progress_bar = ttk.Progressbar(prog_left_col, orient="horizontal", mode="determinate")
+        self.progress_bar.pack(fill=tk.X, pady=(2, 8))
         
-        # Row 2: Entire Disk Progress Title & Value
-        self.lbl_entire_progress_title = tk.Label(self.bottom_progress_frame, text="Tüm Disk İlerlemesi:", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 9, "bold"))
-        self.lbl_entire_progress_title.pack(anchor="w")
-        self.lbl_entire_progress_val = tk.Label(self.bottom_progress_frame, text="-", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 9))
-        self.lbl_entire_progress_val.pack(anchor="w")
-        
-        self.entire_progress_bar = ttk.Progressbar(self.bottom_progress_frame, orient="horizontal", mode="determinate")
-        self.entire_progress_bar.pack(fill=tk.X, pady=(2, 4))
-        
-        # Row 3: Stats Grid (Speed, Elapsed, ETA)
-        self.stats_frame = tk.Frame(self.bottom_progress_frame, bg=self.content_bg)
+        # Stats Frame under the current scan progress bar
+        self.stats_frame = tk.Frame(prog_left_col, bg=self.content_bg)
         self.stats_frame.pack(fill=tk.X, pady=(5, 0))
         
-        # Grid column 0, 1: speed
-        self.lbl_speed_title = tk.Label(self.stats_frame, text="Tarama Hızı:", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 9, "bold"))
-        self.lbl_speed_title.grid(row=0, column=0, sticky="w", padx=(0, 10), pady=2)
-        self.lbl_speed_val = tk.Label(self.stats_frame, text="-", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 9))
-        self.lbl_speed_val.grid(row=0, column=1, sticky="w", padx=(0, 30), pady=2)
+        self.lbl_speed_title = tk.Label(self.stats_frame, text="Tarama Hızı:", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 8, "bold"))
+        self.lbl_speed_title.grid(row=0, column=0, sticky="w", padx=(0, 5), pady=2)
+        self.lbl_speed_val = tk.Label(self.stats_frame, text="-", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 8))
+        self.lbl_speed_val.grid(row=0, column=1, sticky="w", padx=(0, 15), pady=2)
         
-        # Grid column 2, 3: elapsed
-        self.lbl_elapsed_title = tk.Label(self.stats_frame, text="Geçen Süre:", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 9, "bold"))
-        self.lbl_elapsed_title.grid(row=0, column=2, sticky="w", padx=(0, 10), pady=2)
-        self.lbl_elapsed_val = tk.Label(self.stats_frame, text="-", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 9))
-        self.lbl_elapsed_val.grid(row=0, column=3, sticky="w", padx=(0, 30), pady=2)
+        self.lbl_elapsed_title = tk.Label(self.stats_frame, text="Geçen Süre:", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 8, "bold"))
+        self.lbl_elapsed_title.grid(row=0, column=2, sticky="w", padx=(0, 5), pady=2)
+        self.lbl_elapsed_val = tk.Label(self.stats_frame, text="-", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 8))
+        self.lbl_elapsed_val.grid(row=0, column=3, sticky="w", padx=(0, 15), pady=2)
         
-        # Grid column 4, 5: eta
-        self.lbl_eta_title = tk.Label(self.stats_frame, text="Tahmini Kalan Süre:", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 9, "bold"))
-        self.lbl_eta_title.grid(row=0, column=4, sticky="w", padx=(0, 10), pady=2)
-        self.lbl_eta_val = tk.Label(self.stats_frame, text="-", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 9))
-        self.lbl_eta_val.grid(row=0, column=5, sticky="w", padx=(0, 30), pady=2)
-
-        # Row 4: Backup / Export Progress Title, Value & Progress Bar
-        self.lbl_backup_progress_title = tk.Label(self.bottom_progress_frame, text="Yedekleme / Aktarım İlerlemesi:", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 9, "bold"))
-        self.lbl_backup_progress_title.pack(anchor="w", pady=(8, 0))
-        self.lbl_backup_progress_val = tk.Label(self.bottom_progress_frame, text="Beklemede (Aktif yedekleme yok)", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 9))
-        self.lbl_backup_progress_val.pack(anchor="w")
+        self.lbl_eta_title = tk.Label(self.stats_frame, text="Kalan Süre:", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 8, "bold"))
+        self.lbl_eta_title.grid(row=0, column=4, sticky="w", padx=(0, 5), pady=2)
+        self.lbl_eta_val = tk.Label(self.stats_frame, text="-", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 8))
+        self.lbl_eta_val.grid(row=0, column=5, sticky="w", pady=2)
         
-        self.backup_progress_bar = ttk.Progressbar(self.bottom_progress_frame, orient="horizontal", mode="determinate")
-        self.backup_progress_bar.pack(fill=tk.X, pady=(2, 4))
+        # --- RIGHT COLUMN (Entire Disk Progress & Backup/Export Progress) ---
+        self.lbl_entire_progress_title = tk.Label(prog_right_col, text="Tüm Disk İlerlemesi:", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 9, "bold"))
+        self.lbl_entire_progress_title.pack(anchor="w")
+        self.lbl_entire_progress_val = tk.Label(prog_right_col, text="-", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 9))
+        self.lbl_entire_progress_val.pack(anchor="w", pady=(2, 4))
+        
+        self.entire_progress_bar = ttk.Progressbar(prog_right_col, orient="horizontal", mode="determinate")
+        self.entire_progress_bar.pack(fill=tk.X, pady=(2, 8))
+        
+        self.lbl_backup_progress_title = tk.Label(prog_right_col, text="Yedekleme / Aktarım İlerlemesi:", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 9, "bold"))
+        self.lbl_backup_progress_title.pack(anchor="w")
+        self.lbl_backup_progress_val = tk.Label(prog_right_col, text="Beklemede (Aktif yedekleme yok)", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 8))
+        self.lbl_backup_progress_val.pack(anchor="w", pady=(2, 4))
+        
+        self.backup_progress_bar = ttk.Progressbar(prog_right_col, orient="horizontal", mode="determinate")
+        self.backup_progress_bar.pack(fill=tk.X, pady=(2, 0))
 
     def init_file_view(self):
         top_bar = tk.Frame(self.file_view, bg=self.content_bg, padx=15, pady=10, bd=1, relief="solid")
@@ -1559,6 +1576,7 @@ class LayoutMixin:
             if added:
                 self.save_app_settings()
                 refresh_queue_listbox()
+                self.populate_detail_map_tree(tree)
 
         def remove_from_queue():
             sel_idx = queue_listbox.curselection()
@@ -1568,6 +1586,7 @@ class LayoutMixin:
                 self.scan_queue.pop(idx)
             self.save_app_settings()
             refresh_queue_listbox()
+            self.populate_detail_map_tree(tree)
 
         def move_up():
             sel_idx = queue_listbox.curselection()
@@ -1579,6 +1598,7 @@ class LayoutMixin:
                 self.save_app_settings()
                 refresh_queue_listbox()
                 queue_listbox.select_set(idx - 1)
+                self.populate_detail_map_tree(tree)
 
         def move_down():
             sel_idx = queue_listbox.curselection()
@@ -1590,11 +1610,13 @@ class LayoutMixin:
                 self.save_app_settings()
                 refresh_queue_listbox()
                 queue_listbox.select_set(idx + 1)
+                self.populate_detail_map_tree(tree)
 
         def clear_queue():
             self.scan_queue.clear()
             self.save_app_settings()
             refresh_queue_listbox()
+            self.populate_detail_map_tree(tree)
 
         add_btn = tk.Button(q_btn_frame, text="[+] Ekle", command=add_to_queue, bg="#10AC84", fg="#FFFFFF", borderwidth=0, font=("Segoe UI", 8, "bold"), pady=4)
         add_btn.grid(row=0, column=0, sticky="ew", padx=2, pady=2)
@@ -1636,6 +1658,7 @@ class LayoutMixin:
         tree.tag_configure("scanning", background="#D35400", foreground="#FFFFFF")
         tree.tag_configure("scanned", background="#10AC84", foreground="#FFFFFF")
         tree.tag_configure("partial", background="#2ECC71", foreground="#FFFFFF")
+        tree.tag_configure("queued", background="#2980B9", foreground="#FFFFFF")
         tree.tag_configure("unscanned", background="#2F3542", foreground="#FFFFFF")
         
         self.detail_map_tree = tree
@@ -1951,6 +1974,9 @@ class LayoutMixin:
             if is_currently_scanning:
                 status = "Taranıyor"
                 tag = "scanning"
+            elif (i + 1) in getattr(self, "scan_queue", []):
+                status = "Kuyrukta"
+                tag = "queued"
             elif scanned_pct >= 0.95:
                 status = "Tarandı"
                 tag = "scanned"
