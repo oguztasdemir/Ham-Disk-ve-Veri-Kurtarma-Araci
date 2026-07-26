@@ -86,21 +86,28 @@ class ScanMixin:
             self.current_session_file = None
             
         selected_disp = self.drive_var.get()
-        if not selected_disp or selected_disp == "Diskler aranıyor...":
-            messagebox.showwarning("Uyarı", "Lütfen kurtarma yapmak istediğiniz diski seçin!")
-            return
+        if not selected_disp and hasattr(self, "drive_combo") and self.drive_combo.get():
+            selected_disp = self.drive_combo.get()
+            self.drive_var.set(selected_disp)
             
-        if "seagate" not in selected_disp.lower():
-            messagebox.showerror(
-                "Kritik Hata: Uyumsuz Sürücü!",
-                "Hata: Seçilen sürücü Seagate marka değil!\n\n"
-                "Veri kurtarma işleminin yalnızca Seagate disk üzerinden yapılması planlanmıştır. "
-                "Lütfen doğru sürücüyü seçtiğinizden emin olun."
-            )
-            return
+        if not selected_disp or selected_disp == "Diskler aranıyor...":
+            if hasattr(self, "drives_map") and self.drives_map:
+                selected_disp = list(self.drives_map.keys())[0]
+                self.drive_var.set(selected_disp)
+            else:
+                messagebox.showwarning("Uyarı", "Lütfen kurtarma yapmak istediğiniz diski seçin!")
+                return
             
         self.active_drive = self.drives_map.get(selected_disp)
         self.active_drive_size = self.drives_sizes_map.get(selected_disp, 0)
+        
+        if not self.active_drive and hasattr(self, "drives_map") and self.drives_map:
+            # Fallback to first available drive
+            first_disp = list(self.drives_map.keys())[0]
+            self.active_drive = self.drives_map[first_disp]
+            self.active_drive_size = self.drives_sizes_map.get(first_disp, 0)
+            self.drive_var.set(first_disp)
+            
         if not self.active_drive:
             messagebox.showerror("Hata", "Sürücü yolu tespit edilemedi.")
             return
@@ -120,13 +127,29 @@ class ScanMixin:
                 
         # Final safety check: double verify same-disk constraint
         if self.is_same_disk(self.active_drive, self.selected_output_dir):
-            messagebox.showerror(
-                "Kritik Hata: Aynı Disk!", 
-                "Hata: Kurtarma yapmak istediğiniz hedef disk ile kaynak disk aynı fiziksel disk üzerindedir!\n\n"
-                "Verilerin üst üste yazılmasını (overwrite) ve veri kaybını önlemek için lütfen kurtarma konumunu değiştirin."
-            )
-            self.current_session_file = None
-            return
+            suggested_root = self.get_default_target_drive_root()
+            if suggested_root:
+                self.selected_output_dir = os.path.abspath(os.path.join(suggested_root, "kurtarilan_dosyalar"))
+                if hasattr(self, "path_lbl") and self.path_lbl:
+                    self.path_lbl.config(text=self.selected_output_dir)
+                if hasattr(self, "update_target_drive_status"):
+                    self.update_target_drive_status()
+            
+            # Re-check after auto-fixing
+            if self.is_same_disk(self.active_drive, self.selected_output_dir):
+                messagebox.showerror(
+                    "Kritik Hata: Aynı Disk!", 
+                    "Hata: Kurtarma yapmak istediğiniz hedef disk ile kaynak disk aynı fiziksel disk üzerindedir!\n\n"
+                    "Verilerin üst üste yazılmasını (overwrite) önlemek için lütfen kurtarma konumunu farklı bir diske ayarlayın."
+                )
+                self.is_scanning = False
+                self.scan_paused = False
+                self.start_btn.config(state="normal", bg=self.accent_blue, fg=self.text_white)
+                self.pause_btn.config(state="disabled", bg="#CED6E0", fg=self.text_gray)
+                self.resume_btn.config(state="disabled", bg="#CED6E0", fg=self.text_gray)
+                self.backup_btn.config(state="disabled", bg="#CED6E0", fg=self.text_gray)
+                self.current_session_file = None
+                return
 
         active_sigs = self.get_active_signatures()
 
@@ -147,15 +170,28 @@ class ScanMixin:
         # Reset stats UI
         self.resume_offset = 0
         self.elapsed_seconds = 0.0
-        self.lbl_progress_val.config(text="0% (0.00 GB)")
-        self.lbl_speed_val.config(text="-")
+        drive_total_gb = (self.active_drive_size / (1024 * 1024 * 1024)) if self.active_drive_size > 0 else 0.0
+        
+        self.lbl_progress_val.config(text=f"%0.0 (0.00 GB / {drive_total_gb:.2f} GB)")
+        if hasattr(self, "lbl_entire_progress_val") and self.lbl_entire_progress_val:
+            self.lbl_entire_progress_val.config(text=f"%0.0 (0.00 GB / {drive_total_gb:.2f} GB)")
+        if hasattr(self, "lbl_drive_scanned") and self.lbl_drive_scanned:
+            self.lbl_drive_scanned.config(text="Taranan Alan: 0.00 GB (%0.0)", fg="#0084FF")
+            
+        self.lbl_speed_val.config(text="0.00 MB/s")
         self.lbl_elapsed_val.config(text="00:00")
-        self.lbl_eta_val.config(text="-")
+        self.lbl_eta_val.config(text="Hesaplanıyor...")
         
         self.progress_bar.config(mode="determinate", value=0)
+        if hasattr(self, "entire_progress_bar") and self.entire_progress_bar:
+            self.entire_progress_bar.config(mode="determinate", value=0)
         
-        self.scan_header_lbl.config(text=f'"{selected_disp.split(":")[1].strip()}" taranıyor')
-        self.scan_progress_lbl.config(text="Tarama başlatıldı. Lütfen bekleyin...")
+        clean_disp_name = selected_disp.split(":")[1].strip() if ":" in selected_disp else selected_disp
+        self.scan_header_lbl.config(text=f'"{clean_disp_name}" Taranıyor...')
+        self.scan_progress_lbl.config(text="Tarama başlatıldı. Sektörler okunuyor...")
+        
+        if hasattr(self, "update_target_drive_status"):
+            self.update_target_drive_status()
         
         # Helper function to parse values with comma/dot decimals and unit scaling
         def parse_to_bytes(val_str, unit):
@@ -228,6 +264,10 @@ class ScanMixin:
         # Start the worker threads
         for _ in range(worker_count):
             threading.Thread(target=scan_disk_worker, name="ScanWorker", args=(self, self.active_drive, active_sigs), daemon=True).start()
+            
+        # Open dedicated live scan progress modal panel
+        if hasattr(self, "show_scan_progress_modal"):
+            self.after(100, self.show_scan_progress_modal)
 
     def pause_recovery(self):
         self.scan_paused = True
@@ -1608,16 +1648,16 @@ class ScanMixin:
         self.segment_progress = {}
         for k, v in raw_progress.items():
             try:
-                self.segment_progress[int(k)] = v
-            except ValueError:
+                self.segment_progress[int(k)] = int(v)
+            except (ValueError, TypeError):
                 self.segment_progress[k] = v
                 
         raw_bounds = state.get("segment_bounds", {})
         self.segment_bounds = {}
         for k, v in raw_bounds.items():
             try:
-                self.segment_bounds[int(k)] = v
-            except ValueError:
+                self.segment_bounds[int(k)] = int(v)
+            except (ValueError, TypeError):
                 self.segment_bounds[k] = v
                 
         raw_ntfs = state.get("ntfs_deleted_files", {})
@@ -1691,6 +1731,8 @@ class ScanMixin:
             self.entire_progress_bar.config(mode="determinate", value=entire_pct)
         if hasattr(self, "lbl_entire_progress_val"):
             self.lbl_entire_progress_val.config(text=f"{entire_pct:.2f}% ({total_scanned_bytes / (1024*1024*1024):.2f} GB / {total_size_gb:.2f} GB)")
+        if hasattr(self, "lbl_drive_scanned") and self.lbl_drive_scanned:
+            self.lbl_drive_scanned.config(text=f"Taranan Alan: {total_scanned_bytes / (1024*1024*1024):.2f} GB (%{entire_pct:.1f})", fg="#0084FF")
             
         self.lbl_speed_val.config(text="-")
         
@@ -1736,8 +1778,8 @@ class ScanMixin:
             self.segment_progress = {}
             for k, v in raw_progress.items():
                 try:
-                    self.segment_progress[int(k)] = v
-                except ValueError:
+                    self.segment_progress[int(k)] = int(v)
+                except (ValueError, TypeError):
                     self.segment_progress[k] = v
                     
             raw_ntfs = state.get("ntfs_deleted_files", {})

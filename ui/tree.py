@@ -46,8 +46,11 @@ class TreeMixin:
             if hide:
                 if self.get_preview_status(f) != "Önizlenebildi":
                     continue
-            if search_query_val and search_query_val not in f["name"].lower():
-                continue
+            if search_query_val:
+                match_name = search_query_val in f["name"].lower()
+                match_path = search_query_val in f.get("custom_path", "").lower()
+                if not (match_name or match_path):
+                    continue
             filtered_files.append(f)
             
         def natural_sort_key(s):

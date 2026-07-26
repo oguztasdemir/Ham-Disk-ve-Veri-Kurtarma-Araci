@@ -163,7 +163,8 @@ class ExportMixin:
                 if f.get("exported", False):
                     continue
                 if f.get("custom_path"):
-                    category_dir = os.path.join(output_root, f["custom_path"])
+                    clean_rel = f["custom_path"].lstrip("/\\")
+                    category_dir = os.path.join(output_root, clean_rel)
                 else:
                     category_dir = os.path.join(output_root, f["category"])
                     
@@ -186,38 +187,42 @@ class ExportMixin:
                     self.msg_queue.put(("status", f"Kaydediliyor: {exported_count}/{len(files_list)}..."))
                     continue
                     
-                if f["size"] > 50 * 1024 * 1024:
-                    chunk_size = 8 * 1024 * 1024
-                    bytes_written = 0
-                    with open(out_path, "wb") as out:
-                        while bytes_written < f["size"]:
-                            if getattr(self, "export_cancelled", False):
-                                break
-                            to_read = min(chunk_size, f["size"] - bytes_written)
-                            chunk_bytes = self.read_raw_bytes(f["offset"] + bytes_written, to_read)
-                            if not chunk_bytes:
-                                break
-                            out.write(chunk_bytes)
-                            bytes_written += len(chunk_bytes)
-                else:
-                    file_bytes = self.read_raw_bytes(f["offset"], f["size"])
-                    if ext in [".jpg", ".jpeg"]:
-                        file_bytes = self.repair_jpeg(file_bytes)
-                    
-                    with open(out_path, "wb") as out:
-                        out.write(file_bytes)
+                try:
+                    if f["size"] > 50 * 1024 * 1024:
+                        chunk_size = 8 * 1024 * 1024
+                        bytes_written = 0
+                        with open(out_path, "wb") as out:
+                            while bytes_written < f["size"]:
+                                if getattr(self, "export_cancelled", False):
+                                    break
+                                to_read = min(chunk_size, f["size"] - bytes_written)
+                                chunk_bytes = self.read_raw_bytes(f["offset"] + bytes_written, to_read)
+                                if not chunk_bytes:
+                                    break
+                                out.write(chunk_bytes)
+                                bytes_written += len(chunk_bytes)
+                    else:
+                        file_bytes = self.read_raw_bytes(f["offset"], f["size"])
+                        if ext in [".jpg", ".jpeg"]:
+                            file_bytes = self.repair_jpeg(file_bytes)
                         
-                    if ext == ".mp4":
-                        try:
-                            if b"moov" not in file_bytes:
-                                raw_h264 = self.extract_raw_h264(file_bytes)
-                                if raw_h264:
-                                    raw_name = f["name"].replace(".mp4", "_ham_akis.h264")
-                                    raw_path = os.path.join(category_dir, raw_name)
-                                    with open(raw_path, "wb") as out_raw:
-                                        out_raw.write(raw_h264)
-                        except Exception as e:
-                            print(f"H264 ayıklama hatası: {e}")
+                        with open(out_path, "wb") as out:
+                            out.write(file_bytes)
+                            
+                        if ext == ".mp4":
+                            try:
+                                if b"moov" not in file_bytes:
+                                    raw_h264 = self.extract_raw_h264(file_bytes)
+                                    if raw_h264:
+                                        raw_name = f["name"].replace(".mp4", "_ham_akis.h264")
+                                        raw_path = os.path.join(category_dir, raw_name)
+                                        with open(raw_path, "wb") as out_raw:
+                                            out_raw.write(raw_h264)
+                            except Exception as e:
+                                print(f"H264 ayıklama hatası: {e}")
+                except Exception as ex:
+                    print(f"Dosya dışa aktarma hatası ({f.get('name')}): {ex}")
+                    continue
                             
                 # Extract zip contents if it is a ZIP archive
                 if ext == ".zip":
@@ -352,7 +357,8 @@ class ExportMixin:
                 if f.get("exported", False):
                     continue
                 if f.get("custom_path"):
-                    category_dir = os.path.join(output_root, f["custom_path"])
+                    clean_rel = f["custom_path"].lstrip("/\\")
+                    category_dir = os.path.join(output_root, clean_rel)
                 else:
                     category_dir = os.path.join(output_root, f["category"])
                     

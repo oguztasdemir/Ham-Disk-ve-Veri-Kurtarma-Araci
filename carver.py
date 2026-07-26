@@ -323,6 +323,8 @@ def producer_read_segment_loop(disk, read_queue, app_instance, chunk_size, start
                     if to_read <= 0:
                         read_queue.put((None, None))
                         break
+                    # Sector-align to_read to 512-byte boundary for Windows raw disk compatibility
+                    to_read = ((to_read + 511) // 512) * 512
                         
                 chunk = disk.read(to_read)
                 actual_offset = current_offset
@@ -349,13 +351,9 @@ def scan_disk_worker(app_instance, drive_path, signatures):
             
     if not mft_already_loaded:
         try:
-            is_physical = "physicaldrive" in str(drive_path).lower()
-            if is_physical:
-                mft_data = {}
-            else:
-                from ntfs import scan_ntfs_deleted_files
-                app_instance.msg_queue.put(("status", "Silinmiş dosya isimleri taranıyor..."))
-                mft_data = scan_ntfs_deleted_files(drive_path, app_instance.disk_lock)
+            from ntfs import scan_ntfs_deleted_files
+            app_instance.msg_queue.put(("status", "Silinmiş dosya isimleri ve klasör yapısı taranıyor..."))
+            mft_data = scan_ntfs_deleted_files(drive_path, app_instance)
             with app_instance.segment_lock:
                 app_instance.ntfs_deleted_files = mft_data
         except Exception as e:
@@ -368,11 +366,15 @@ def scan_disk_worker(app_instance, drive_path, signatures):
     start_time = time.time() - getattr(app_instance, "elapsed_seconds", 0.0)
     total_paused_time = 0.0
     last_update_time = 0.0
+    initial_scanned_bytes = 0
+    with app_instance.segment_lock:
+        if getattr(app_instance, "segment_progress", None):
+            initial_scanned_bytes = sum(app_instance.segment_progress.values())
     
-    def send_progress(current_bytes):
+    def send_progress(current_bytes, force=False):
         nonlocal last_update_time
         current_time = time.time()
-        if current_time - last_update_time >= 0.3:
+        if force or (current_time - last_update_time >= 0.3):
             last_update_time = current_time
             elapsed_time = current_time - start_time - total_paused_time
             if elapsed_time <= 0:
@@ -387,12 +389,14 @@ def scan_disk_worker(app_instance, drive_path, signatures):
             
             total_scanned_bytes = 0
             with app_instance.segment_lock:
-                for seg_start, prog in app_instance.segment_progress.items():
-                    if scan_start <= seg_start < scan_end:
-                        total_scanned_bytes += prog
+                if getattr(app_instance, "segment_progress", None):
+                    for seg_start, prog in app_instance.segment_progress.items():
+                        if scan_start <= seg_start < scan_end:
+                            total_scanned_bytes += prog
             
-            # Speed (MB/s)
-            speed_mb = (total_scanned_bytes / (1024 * 1024)) / elapsed_time
+            # Speed (MB/s) calculated over the current active run
+            bytes_scanned_in_run = max(0, total_scanned_bytes - initial_scanned_bytes)
+            speed_mb = (bytes_scanned_in_run / (1024 * 1024)) / elapsed_time
             
             # Percentage
             if range_size > 0:
@@ -403,7 +407,7 @@ def scan_disk_worker(app_instance, drive_path, signatures):
                 
             # ETA
             if pct > 0.1 and speed_mb > 0.01 and range_size > 0:
-                remaining_bytes = range_size - total_scanned_bytes
+                remaining_bytes = max(0, range_size - total_scanned_bytes)
                 remaining_seconds = remaining_bytes / (speed_mb * 1024 * 1024)
                 
                 eta_hours = int(remaining_seconds // 3600)
@@ -415,6 +419,8 @@ def scan_disk_worker(app_instance, drive_path, signatures):
                     eta_str = f"{eta_mins} dk {eta_secs} sn"
                 else:
                     eta_str = f"{eta_secs} sn"
+            elif pct >= 99.9:
+                eta_str = "Tamamlandı"
             else:
                 eta_str = "Hesaplanıyor..."
                 
@@ -429,8 +435,9 @@ def scan_disk_worker(app_instance, drive_path, signatures):
                 
             entire_scanned_bytes = 0
             with app_instance.segment_lock:
-                for seg_start, prog in app_instance.segment_progress.items():
-                    entire_scanned_bytes += prog
+                if getattr(app_instance, "segment_progress", None):
+                    for seg_start, prog in app_instance.segment_progress.items():
+                        entire_scanned_bytes += prog
                     
             app_instance.msg_queue.put(("progress_update", {
                 "pct": pct,
@@ -445,6 +452,9 @@ def scan_disk_worker(app_instance, drive_path, signatures):
                 "entire_total_gb": total_size / (1024 * 1024 * 1024) if total_size > 0 else 0.0,
                 "entire_pct": (entire_scanned_bytes / total_size * 100) if total_size > 0 else 0.0
             }))
+
+    # Immediately push initial progress update so UI displays real figures instead of dashes
+    send_progress(0, force=True)
 
     try:
         worker_lock = threading.Lock()
@@ -572,6 +582,13 @@ def scan_disk_worker(app_instance, drive_path, signatures):
                                 idx = buffer.find(b"ftyp")
                                 if idx >= 4:
                                     start_idx = idx - 4
+                                    ftyp_brand = buffer[start_idx + 8 : start_idx + 12]
+                                    if sig["ext"] == ".m4a" and ftyp_brand not in [b"M4A ", b"M4B ", b"M4P "]:
+                                        start_idx = -1
+                                    elif sig["ext"] == ".mov" and ftyp_brand not in [b"qt  ", b"moov"]:
+                                        start_idx = -1
+                                    elif sig["ext"] == ".mp4" and ftyp_brand in [b"M4A ", b"M4B ", b"M4P ", b"qt  ", b"moov"]:
+                                        start_idx = -1
                                 else:
                                     start_idx = -1
                             elif sig["ext"] in [".webp", ".wav", ".avi"]:
@@ -668,7 +685,8 @@ def scan_disk_worker(app_instance, drive_path, signatures):
                                 block_idx = int((absolute_start_offset / total_size) * 100)
                                 block_idx = max(0, min(99, block_idx))
 
-                                if file_len < 102400:
+                                min_file_size = getattr(app_instance, "min_file_size_bytes", 102400)
+                                if file_len < min_file_size:
                                     with app_instance.disk_lock:
                                         if not hasattr(app_instance, "block_unwanted_counts"):
                                             app_instance.block_unwanted_counts = [0] * 100
@@ -770,7 +788,7 @@ def scan_disk_worker(app_instance, drive_path, signatures):
                                             is_previewable = True
                                             width, height, source_group, date_str = extract_image_properties_from_header(repaired_bytes)
                                             
-                                    elif file_ext == ".mp4":
+                                    elif file_ext in [".mp4", ".mov", ".m4a"]:
                                         if not (b"ftyp" in header_bytes or b"moov" in header_bytes or b"mdat" in header_bytes):
                                             with app_instance.disk_lock:
                                                 if not hasattr(app_instance, "block_unwanted_counts"):
@@ -787,8 +805,20 @@ def scan_disk_worker(app_instance, drive_path, signatures):
                                             break
                                         else:
                                             is_previewable = True
+                                    elif file_ext in [".pdf", ".zip", ".rar", ".7z", ".docx", ".xlsx", ".pptx", ".mp3", ".wav", ".flac", ".mkv", ".webm", ".avi"]:
+                                        is_previewable = True
                                 except Exception as e:
                                     pass
+                                    
+                                if not is_previewable:
+                                    buffer = buffer[start_idx + header_len:]
+                                    buffer_start_offset += start_idx + header_len
+                                    scanned_in_segment = buffer_start_offset - segment_start
+                                    with app_instance.segment_lock:
+                                        app_instance.segment_progress[segment_start] = scanned_in_segment
+                                    send_progress(buffer_start_offset)
+                                    matched = True
+                                    break
                                     
                                 with app_instance.disk_lock:
                                     app_instance.total_recovered_count += 1
@@ -875,10 +905,12 @@ def scan_disk_worker(app_instance, drive_path, signatures):
         # unless it is the last thread finishing.
         pass
         
-    # Wait until all workers finish to send finished message
+    # Push final progress update for this worker
+    send_progress(0, force=True)
+
+    # Check if all scanning work is finished
+    all_done = True
     with app_instance.segment_lock:
-        # Check if all segments are completed
-        all_done = True
         bounds = getattr(app_instance, "segment_bounds", {})
         if bounds:
             for start, end in bounds.items():
@@ -887,11 +919,14 @@ def scan_disk_worker(app_instance, drive_path, signatures):
                     all_done = False
                     break
         else:
-            all_done = False
+            # If bounds not set, check if remaining scan_segments is empty
+            if getattr(app_instance, "scan_segments", None):
+                all_done = False
+            else:
+                all_done = True
                 
     if all_done:
         app_instance.is_scanning = False
-        # Get count
         with app_instance.disk_lock:
-            total_cnt = app_instance.total_recovered_count
-        app_instance.msg_queue.put(("finished", f"Sanal tarama bitti! Toplam {total_cnt} dosya izi bulundu."))
+            total_cnt = getattr(app_instance, "total_recovered_count", len(getattr(app_instance, "virtual_files", [])))
+        app_instance.msg_queue.put(("finished", f"Sanal tarama tamamlandı! Toplam {total_cnt} dosya izi bulundu."))

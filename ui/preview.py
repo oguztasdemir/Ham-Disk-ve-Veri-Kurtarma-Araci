@@ -53,7 +53,8 @@ class PreviewMixin:
         return None
 
     def is_file_previewable(self, f):
-        if f["ext"].lower() not in [".jpg", ".jpeg", ".png", ".bmp", ".gif"]:
+        ext = f["ext"].lower()
+        if ext not in [".jpg", ".jpeg", ".png", ".bmp", ".gif", ".webp"]:
             return False
             
         strictness = getattr(self, "preview_strictness_var", None)
@@ -119,20 +120,36 @@ class PreviewMixin:
         if f["size"] < min_size_bytes:
             return "Önizlenemedi"
             
-        if f["ext"].lower() == ".mp4":
-            try:
-                raw_bytes = self.read_raw_bytes(f["offset"], min(f["size"], 1024))
-                if "Hızlı" not in strictness_val:
-                    if (raw_bytes.count(b"\x00") >= len(raw_bytes) * 0.90 or 
-                        (len(raw_bytes) > 0 and raw_bytes == raw_bytes[0:1] * len(raw_bytes))):
-                        return "Önizlenemedi"
-                if b"ftyp" in raw_bytes:
-                    return "Önizlenebildi"
-            except:
-                pass
-            return "Önizlenemedi"
-        elif f["ext"].lower() in [".jpg", ".jpeg", ".png", ".bmp", ".gif"]:
-            return "Önizlenebildi" if self.is_file_previewable(f) else "Önizlenemedi"
+        ext = f["ext"].lower()
+        try:
+            raw_bytes = self.read_raw_bytes(f["offset"], min(f["size"], 1024))
+            if "Hızlı" not in strictness_val:
+                if (raw_bytes.count(b"\x00") >= len(raw_bytes) * 0.90 or 
+                    (len(raw_bytes) > 0 and raw_bytes == raw_bytes[0:1] * len(raw_bytes))):
+                    return "Önizlenemedi"
+            
+            if ext in [".mp4", ".mov", ".m4a"]:
+                return "Önizlenebildi" if b"ftyp" in raw_bytes else "Önizlenemedi"
+            elif ext in [".mkv", ".webm"]:
+                return "Önizlenebildi" if b"\x1a\x45\xdf\xa3" in raw_bytes else "Önizlenemedi"
+            elif ext in [".wav", ".avi", ".webp"]:
+                return "Önizlenebildi" if b"RIFF" in raw_bytes else "Önizlenemedi"
+            elif ext == ".pdf":
+                return "Önizlenebildi" if b"%PDF-" in raw_bytes else "Önizlenemedi"
+            elif ext == ".zip":
+                return "Önizlenebildi" if b"PK\x03\x04" in raw_bytes else "Önizlenemedi"
+            elif ext == ".rar":
+                return "Önizlenebildi" if b"Rar!" in raw_bytes else "Önizlenemedi"
+            elif ext == ".7z":
+                return "Önizlenebildi" if b"7z\xbc\xaf" in raw_bytes else "Önizlenemedi"
+            elif ext == ".mp3":
+                return "Önizlenebildi" if (b"ID3" in raw_bytes or raw_bytes.startswith(b"\xff\xfb")) else "Önizlenemedi"
+            elif ext == ".flac":
+                return "Önizlenebildi" if b"fLaC" in raw_bytes else "Önizlenemedi"
+            elif ext in [".jpg", ".jpeg", ".png", ".bmp", ".gif"]:
+                return "Önizlenebildi" if self.is_file_previewable(f) else "Önizlenemedi"
+        except:
+            pass
         return "Önizlenemedi"
 
     def on_file_select(self, event):

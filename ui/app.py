@@ -14,7 +14,7 @@ try:
 except ImportError:
     HAS_PILLOW = False
 
-from config import BG_DARK, SIDEBAR_BG, CONTENT_BG, TEXT_DARK, TEXT_GRAY, ACCENT_BLUE, TEXT_WHITE, CATEGORIES, FILE_SIGNATURES, APP_NAME, APP_VERSION
+from config import BG_DARK, SIDEBAR_BG, CONTENT_BG, TEXT_DARK, TEXT_GRAY, ACCENT_BLUE, TEXT_WHITE, CATEGORIES, FILE_SIGNATURES, APP_NAME, APP_VERSION, MIN_FILE_SIZE_BYTES
 from carver import read_raw_bytes_shared
 
 from ui.drives import DrivesMixin
@@ -59,7 +59,8 @@ class RecoveryApp(tk.Tk, DrivesMixin, ScanMixin, PreviewMixin, ExportMixin, Tree
         sys.stderr = self.redirector
 
         self.title(f"{APP_NAME} v{APP_VERSION} - Profesyonel Veri Kurtarma Paneli")
-        self.geometry("1320x800")
+        self.geometry("1440x880")
+        self.minsize(1280, 720)
         self.configure(bg=BG_DARK)
         
         # Color & style assets
@@ -123,7 +124,7 @@ class RecoveryApp(tk.Tk, DrivesMixin, ScanMixin, PreviewMixin, ExportMixin, Tree
         self.block_copy_counts = [0] * 100
         self.block_unwanted_counts = [0] * 100
 
-        # Parallel and range scan variables
+        self.min_file_size_bytes = MIN_FILE_SIZE_BYTES
         self.use_parallel_var = tk.BooleanVar(value=False)
         self.worker_count_var = tk.StringVar(value="4")
         self.segment_size_gb_var = tk.StringVar(value="100")
@@ -253,39 +254,48 @@ class RecoveryApp(tk.Tk, DrivesMixin, ScanMixin, PreviewMixin, ExportMixin, Tree
             processed += 1
             msg_type, data = self.msg_queue.get()
             if msg_type == "loaded_drives":
-                self.drive_combo.config(values=data)
+                if isinstance(data, dict):
+                    options = data.get("options", [])
+                    self.drives_map = data.get("drives_map", {})
+                    self.drives_sizes_map = data.get("drives_sizes_map", {})
+                    self.drives_details_map = data.get("drives_details_map", {})
+                else:
+                    options = data
+                    
+                self.drive_combo.config(values=options)
                 
-                # Check if we have an active session drive already loaded
+                # Check if we have an active session drive or a SEAGATE drive
                 matching_idx = None
-                if getattr(self, "active_drive", None) and hasattr(self, "drives_map") and self.drives_map:
-                    for idx, opt in enumerate(data):
-                        if self.drives_map.get(opt) == self.active_drive:
+                seagate_idx = None
+                if options and hasattr(self, "drives_map") and self.drives_map:
+                    for idx, opt in enumerate(options):
+                        if getattr(self, "active_drive", None) and self.drives_map.get(opt) == self.active_drive:
                             matching_idx = idx
-                            break
-                            
-                seagate_idx = 0
-                for idx, opt in enumerate(data):
-                    if "seagate" in opt.lower():
-                        seagate_idx = idx
-                        break
+                        if seagate_idx is None and "seagate" in opt.lower():
+                            seagate_idx = idx
                 
-                if data:
+                if options:
                     if matching_idx is not None:
-                        self.drive_combo.current(matching_idx)
+                        default_idx = matching_idx
+                    elif seagate_idx is not None:
+                        default_idx = seagate_idx
                     else:
-                        # Only set default seagate if we don't have an active session
-                        if not getattr(self, "current_session_file", None):
-                            self.drive_combo.current(seagate_idx)
+                        default_idx = 0
+                    self.drive_combo.current(default_idx)
+                    self.drive_var.set(options[default_idx])
                     self.on_drive_select()
                     
                 if hasattr(self, "gallery_drive_combo") and self.gallery_drive_combo:
-                    self.gallery_drive_combo.config(values=data)
-                    if data:
+                    self.gallery_drive_combo.config(values=options)
+                    if options:
                         if matching_idx is not None:
-                            self.gallery_drive_combo.current(matching_idx)
+                            default_idx = matching_idx
+                        elif seagate_idx is not None:
+                            default_idx = seagate_idx
                         else:
-                            if not getattr(self, "current_session_file", None):
-                                self.gallery_drive_combo.current(seagate_idx)
+                            default_idx = 0
+                        self.gallery_drive_combo.current(default_idx)
+                        self.gallery_drive_var.set(options[default_idx])
                         
                         selected_disp = self.gallery_drive_var.get()
                         if selected_disp and hasattr(self, "drives_map"):
@@ -362,6 +372,8 @@ class RecoveryApp(tk.Tk, DrivesMixin, ScanMixin, PreviewMixin, ExportMixin, Tree
                     self.entire_progress_bar.config(mode="determinate", value=entire_pct)
                 if hasattr(self, "lbl_entire_progress_val"):
                     self.lbl_entire_progress_val.config(text=f"{entire_pct:.2f}% ({entire_gb:.2f} GB / {entire_total:.2f} GB)")
+                if hasattr(self, "lbl_drive_scanned") and self.lbl_drive_scanned:
+                    self.lbl_drive_scanned.config(text=f"Taranan Alan: {entire_gb:.2f} GB (%{entire_pct:.1f})", fg="#0084FF")
 
                 self.lbl_speed_val.config(text=f"{speed:.2f} MB/s")
                 self.lbl_elapsed_val.config(text=elapsed)
@@ -376,7 +388,13 @@ class RecoveryApp(tk.Tk, DrivesMixin, ScanMixin, PreviewMixin, ExportMixin, Tree
                     current_block = max(1, min(100, current_block))
                 
                 status_text = f"Taranıyor: %{pct:.1f} | Hız: {speed:.2f} MB/s | Kalan: {eta} | Aktif Blok: {current_block}/100"
-                self.scan_progress_lbl.config(text=status_text)
+                if hasattr(self, "scan_progress_lbl") and self.scan_progress_lbl:
+                    self.scan_progress_lbl.config(text=status_text)
+                if hasattr(self, "scan_header_lbl") and self.scan_header_lbl:
+                    active_disp = getattr(self, "drive_var", None)
+                    disp_str = active_disp.get() if active_disp else "Disk"
+                    clean_name = disp_str.split(":")[1].strip() if ":" in disp_str else disp_str
+                    self.scan_header_lbl.config(text=f'"{clean_name}" Taranıyor... (Blok {current_block}/100)')
                 self.status_lbl.config(text=status_text)
                 
                 # Update top status labels (split layout with score)
@@ -406,6 +424,23 @@ class RecoveryApp(tk.Tk, DrivesMixin, ScanMixin, PreviewMixin, ExportMixin, Tree
                     else:
                         self.top_status_frame.pack(side=tk.TOP, fill=tk.X, padx=20, pady=(10, 5))
                 
+                # Update modal panel if open
+                if getattr(self, "scan_modal", None) and self.scan_modal.winfo_exists():
+                    if hasattr(self, "modal_pct_lbl"):
+                        self.modal_pct_lbl.config(text=f"%{pct:.1f}")
+                    if hasattr(self, "modal_gb_lbl"):
+                        self.modal_gb_lbl.config(text=f"Tarama İlerlemesi: {gb:.2f} GB / {total_gb:.2f} GB")
+                    if hasattr(self, "modal_progress_bar"):
+                        self.modal_progress_bar.config(value=pct)
+                    if hasattr(self, "modal_speed_lbl"):
+                        self.modal_speed_lbl.config(text=f"⚡ Hız: {speed:.2f} MB/s")
+                    if hasattr(self, "modal_elapsed_lbl"):
+                        self.modal_elapsed_lbl.config(text=f"⏱️ Süre: {elapsed}")
+                    if hasattr(self, "modal_eta_lbl"):
+                        self.modal_eta_lbl.config(text=f"⏳ Kalan: {eta}")
+                    if hasattr(self, "modal_count_lbl"):
+                        self.modal_count_lbl.config(text=f"📁 Bulunan: {len(getattr(self, 'virtual_files', []))} dosya ({self.format_size(getattr(self, 'total_recovered_size', 0))})")
+
                 if getattr(self, "scan_source", "dashboard") == "gallery":
                     self.gallery_status_lbl.config(text="Taranıyor...")
                     self.gallery_progress_bar.config(value=pct)
@@ -418,6 +453,8 @@ class RecoveryApp(tk.Tk, DrivesMixin, ScanMixin, PreviewMixin, ExportMixin, Tree
                     self.save_scan_state()
                     self.auto_export_unexported()
             elif msg_type == "recovered_file_meta":
+                if data.get("size", 0) < getattr(self, "min_file_size_bytes", 102400):
+                    continue
                 if getattr(self, "scan_source", "dashboard") == "gallery":
                     # 1. Enforce ONLY previewable images
                     if not data.get("is_previewable"):
@@ -429,6 +466,14 @@ class RecoveryApp(tk.Tk, DrivesMixin, ScanMixin, PreviewMixin, ExportMixin, Tree
                 self.update_ui_counters_fast(data)
                 self.tree_needs_update = True
                 self.counters_need_update = True
+
+                # Stream live activity into modal log if modal is active
+                if getattr(self, "scan_modal", None) and self.scan_modal.winfo_exists():
+                    if hasattr(self, "modal_log_text") and self.modal_log_text:
+                        p_name = data.get("custom_path") or data.get("name")
+                        sz_str = self.format_size(data.get("size", 0))
+                        self.modal_log_text.insert(tk.END, f"[✔] {p_name} ({sz_str}) - Tarih: {data.get('date', '-')}\n")
+                        self.modal_log_text.see(tk.END)
             elif msg_type == "display_preview":
                 # Check if the user hasn't selected another file in the meantime
                 if self.current_preview_file_id == data["file_id"]:
@@ -736,36 +781,34 @@ class RecoveryApp(tk.Tk, DrivesMixin, ScanMixin, PreviewMixin, ExportMixin, Tree
                 return source_letter == drive_letter
             return False
             
-        disk_num = m.group(1)
+        disk_num = str(m.group(1))
         
-        # 3. Query FriendlyName of source and target
+        # 3. Check exact DiskNumber via PowerShell (most reliable physical disk identifier)
         try:
-            # Query source friendly name
-            cmd_src = f'powershell -Command "Get-Disk -Number {disk_num} | Select-Object -ExpandProperty FriendlyName"'
-            res_src = subprocess.run(cmd_src, capture_output=True, text=True, shell=True)
-            source_name = res_src.stdout.strip() if res_src.returncode == 0 else ""
-            
-            # Query target friendly name
-            cmd_tgt = f'powershell -Command "Get-Partition -DriveLetter {drive_letter} | Get-Disk | Select-Object -ExpandProperty FriendlyName"'
-            res_tgt = subprocess.run(cmd_tgt, capture_output=True, text=True, shell=True)
-            target_name = res_tgt.stdout.strip() if res_tgt.returncode == 0 else ""
-            
-            if source_name and target_name:
-                # If friendly names are different, they are different physical disks!
-                return source_name.lower().strip() == target_name.lower().strip()
-        except Exception as e:
-            print(f"Friendly name check error: {e}")
-            
-        # Fallback to DiskNumber matching
-        try:
-            cmd = f'powershell -Command "Get-Partition -DriveLetter {drive_letter} | Select-Object -ExpandProperty DiskNumber"'
+            cmd = f'powershell -NoProfile -Command "Get-Partition -DriveLetter {drive_letter} | Select-Object -ExpandProperty DiskNumber"'
             res = subprocess.run(cmd, capture_output=True, text=True, shell=True)
             if res.returncode == 0 and res.stdout.strip():
-                target_disk_num = res.stdout.strip()
-                return target_disk_num == disk_num
+                target_disk_num = str(res.stdout.strip())
+                if target_disk_num == disk_num:
+                    return True
         except Exception as e:
             print(f"DiskNumber check error: {e}")
-            
+
+        # 4. Secondary check: compare physical serial numbers
+        try:
+            cmd_src = f'powershell -NoProfile -Command "(Get-Disk -Number {disk_num}).SerialNumber"'
+            res_src = subprocess.run(cmd_src, capture_output=True, text=True, shell=True)
+            src_serial = res_src.stdout.strip() if res_src.returncode == 0 else ""
+
+            cmd_tgt = f'powershell -NoProfile -Command "(Get-Partition -DriveLetter {drive_letter} | Get-Disk).SerialNumber"'
+            res_tgt = subprocess.run(cmd_tgt, capture_output=True, text=True, shell=True)
+            tgt_serial = res_tgt.stdout.strip() if res_tgt.returncode == 0 else ""
+
+            if src_serial and tgt_serial and src_serial == tgt_serial:
+                return True
+        except:
+            pass
+
         return False
 
     def get_friendly_name_of_drive(self, drive_path):
@@ -868,7 +911,7 @@ class RecoveryApp(tk.Tk, DrivesMixin, ScanMixin, PreviewMixin, ExportMixin, Tree
         return partitions
 
     def get_default_target_drive_root(self):
-        import os, re
+        import os, re, subprocess, json
         source_num = None
         if self.active_drive:
             m = re.search(r"PhysicalDrive(\d+)", self.active_drive, re.IGNORECASE)
@@ -878,8 +921,7 @@ class RecoveryApp(tk.Tk, DrivesMixin, ScanMixin, PreviewMixin, ExportMixin, Tree
         source_letters = []
         if source_num is not None:
             try:
-                import subprocess, json
-                cmd = f'powershell -Command "Get-Partition -DiskNumber {source_num} | Select-Object -ExpandProperty DriveLetter | ConvertTo-Json"'
+                cmd = f'powershell -NoProfile -Command "Get-Partition -DiskNumber {source_num} | Select-Object -ExpandProperty DriveLetter | ConvertTo-Json"'
                 res = subprocess.run(cmd, capture_output=True, text=True, shell=True)
                 if res.returncode == 0 and res.stdout.strip():
                     data = json.loads(res.stdout.strip())
@@ -890,12 +932,37 @@ class RecoveryApp(tk.Tk, DrivesMixin, ScanMixin, PreviewMixin, ExportMixin, Tree
             except:
                 pass
 
-        for letter in "DEFGHIJKLMNOPQRSTUVWXYZ":
+        # 1. Search for Removable / USB Drives first (e.g. USB flash drives / external volumes)
+        fixed_candidates = []
+        try:
+            cmd = 'powershell -NoProfile -Command "Get-Volume | Where-Object {$_.DriveLetter} | Select-Object DriveLetter, DriveType | ConvertTo-Json"'
+            res = subprocess.run(cmd, capture_output=True, text=True, shell=True)
+            if res.returncode == 0 and res.stdout.strip():
+                vols = json.loads(res.stdout.strip())
+                if isinstance(vols, dict): vols = [vols]
+                for v in vols:
+                    let = str(v.get("DriveLetter", "")).strip().upper()
+                    if let and let not in source_letters:
+                        path = f"{let}:\\"
+                        if os.path.exists(path):
+                            dtype = str(v.get("DriveType", "")).lower()
+                            if "removable" in dtype or dtype == "2":
+                                return path
+                            fixed_candidates.append(path)
+        except:
+            pass
+
+        if fixed_candidates:
+            return fixed_candidates[0]
+
+        # 2. Search for any available non-source drive letter
+        for letter in "EFGHIJKLMNOPQRSTUVWXYZD":
             if letter in source_letters:
                 continue
             path = f"{letter}:\\"
             if os.path.exists(path):
                 return path
+
         return "C:\\"
 
     def get_unscanned_segments(self, start_offset, end_offset):
@@ -935,13 +1002,10 @@ class RecoveryApp(tk.Tk, DrivesMixin, ScanMixin, PreviewMixin, ExportMixin, Tree
 
     def periodic_tree_refresh(self):
         if getattr(self, "tree_needs_update", False):
-            # Do not clear/rebuild the treeview while actively scanning to prevent freezing
-            is_active_scanning = self.is_scanning and not self.scan_paused
-            if not is_active_scanning:
-                if hasattr(self, "file_view") and self.file_view.winfo_viewable():
-                    self.update_file_listbox_view()
-                self.tree_needs_update = False
-        self.after(1500, self.periodic_tree_refresh)
+            if hasattr(self, "update_file_listbox_view"):
+                self.update_file_listbox_view()
+            self.tree_needs_update = False
+        self.after(1000, self.periodic_tree_refresh)
 
     def refresh_ui_widgets(self):
         self.all_files_btn.config(text=f"📁 Tüm Dosyalar ({self.total_recovered_count} - {self.format_size(self.total_recovered_size)})")

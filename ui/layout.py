@@ -193,6 +193,9 @@ class LayoutMixin:
         self.lbl_drive_capacity = tk.Label(self.drive_info_frame, text="Kapasite: -", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 9), anchor="w")
         self.lbl_drive_capacity.pack(fill=tk.X, pady=2)
 
+        self.lbl_drive_scanned = tk.Label(self.drive_info_frame, text="Taranan Alan: -", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 9, "bold"), anchor="w")
+        self.lbl_drive_scanned.pack(fill=tk.X, pady=2)
+
         # 💾 Recovery Target Drive Status Card
         self.target_drive_frame = tk.LabelFrame(
             self.dash_right_frame, 
@@ -242,22 +245,22 @@ class LayoutMixin:
         self.dash_log_visible = False
 
         settings_bar = tk.Frame(self.dash_left_frame, bg=self.content_bg)
-        settings_bar.pack(fill=tk.X, pady=(0, 20))
+        settings_bar.pack(fill=tk.X, pady=(0, 15))
         
-        tk.Label(settings_bar, text="Kurtarılacak Diski Seçin:", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 10, "bold")).pack(side=tk.LEFT, padx=(0, 10))
+        tk.Label(settings_bar, text="Kurtarılacak Diski Seçin:", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 9, "bold")).pack(side=tk.LEFT, padx=(0, 6))
         self.drive_var = tk.StringVar()
-        self.drive_combo = ttk.Combobox(settings_bar, textvariable=self.drive_var, state="readonly", width=30)
-        self.drive_combo.pack(side=tk.LEFT, padx=(0, 10))
+        self.drive_combo = ttk.Combobox(settings_bar, textvariable=self.drive_var, state="readonly", width=25)
+        self.drive_combo.pack(side=tk.LEFT, padx=(0, 6))
         self.drive_combo.bind("<<ComboboxSelected>>", self.on_drive_select)
         
-        refresh_btn = tk.Button(settings_bar, text="Yenile", command=self.load_physical_drives, bg="#F1F2F6", fg=self.text_dark, borderwidth=1, relief="solid", padx=10, font=("Segoe UI", 9))
-        refresh_btn.pack(side=tk.LEFT, padx=(0, 10))
+        refresh_btn = tk.Button(settings_bar, text="Yenile", command=self.load_physical_drives, bg="#F1F2F6", fg=self.text_dark, borderwidth=1, relief="solid", padx=8, pady=3, font=("Segoe UI", 8, "bold"))
+        refresh_btn.pack(side=tk.LEFT, padx=(0, 6))
         
-        self.dash_path_btn = tk.Button(settings_bar, text="Taşınacak Yeri Seçin", command=self.select_output_directory, bg="#F1F2F6", fg=self.text_dark, borderwidth=1, relief="solid", font=("Segoe UI", 9, "bold"), padx=12, pady=4, cursor="hand2")
-        self.dash_path_btn.pack(side=tk.LEFT, padx=(10, 10))
+        self.dash_path_btn = tk.Button(settings_bar, text="Taşınacak Yeri Seçin", command=self.select_output_directory, bg="#F1F2F6", fg=self.text_dark, borderwidth=1, relief="solid", font=("Segoe UI", 8, "bold"), padx=10, pady=3, cursor="hand2")
+        self.dash_path_btn.pack(side=tk.LEFT, padx=(0, 8))
         
-        self.start_btn = tk.Button(settings_bar, text="SANAL TARAMAYI BAŞLAT", command=self.start_recovery, bg=self.accent_blue, fg=self.text_white, borderwidth=0, padx=15, pady=5, font=("Segoe UI", 9, "bold"))
-        self.start_btn.pack(side=tk.LEFT)
+        self.start_btn = tk.Button(settings_bar, text="⚡ KLASÖR YAPISINI VE DOSYALARI TARA", command=self.show_scan_progress_modal, bg=self.accent_blue, fg=self.text_white, borderwidth=0, padx=12, pady=4, font=("Segoe UI", 9, "bold"), cursor="hand2")
+        self.start_btn.pack(side=tk.LEFT, padx=(0, 8))
         
         self.close_session_btn = tk.Button(
             settings_bar, 
@@ -266,9 +269,9 @@ class LayoutMixin:
             bg="#FF4757", 
             fg=self.text_white, 
             borderwidth=0, 
-            padx=12, 
-            pady=5, 
-            font=("Segoe UI", 9, "bold"),
+            padx=10, 
+            pady=4, 
+            font=("Segoe UI", 8, "bold"),
             cursor="hand2"
         )
         
@@ -282,9 +285,9 @@ class LayoutMixin:
             fg=self.accent_blue, 
             activebackground=self.content_bg, 
             activeforeground=self.accent_blue,
-            font=("Segoe UI", 9, "bold")
+            font=("Segoe UI", 8, "bold")
         )
-        self.dash_adv_btn.pack(side=tk.RIGHT, padx=(15, 0))
+        self.dash_adv_btn.pack(side=tk.RIGHT, padx=(10, 0))
         
         # Parallel scan settings bar (not packed initially)
         self.parallel_bar = tk.Frame(self.dash_left_frame, bg=self.content_bg)
@@ -402,7 +405,7 @@ class LayoutMixin:
             cb.pack(side=tk.LEFT, padx=(0, 15))
             self.category_checkboxes.append(cb)
             
-        self.scan_header_lbl = tk.Label(self.dash_left_frame, text="Cihaz Seçin ve Taramayı Başlatın", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 16, "bold"))
+        self.scan_header_lbl = tk.Label(self.dash_left_frame, text="Cihaz Seçin ve Klasör Yapısını Tarayın", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 16, "bold"))
         self.scan_header_lbl.pack(anchor="w", pady=(0, 5))
         
         self.scan_progress_lbl = tk.Label(self.dash_left_frame, text="Taramayı başlattığınızda veriler yer kaplamadan burada listelenecektir.", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 10))
@@ -505,15 +508,15 @@ class LayoutMixin:
         self.disk_map_canvas.bind("<Button-1>", self.on_disk_map_double_click)
             
         ctrl_frame = tk.Frame(self.dash_left_frame, bg=self.content_bg)
-        ctrl_frame.pack(fill=tk.X, pady=10)
+        ctrl_frame.pack(fill=tk.X, pady=8)
         
-        self.pause_btn = tk.Button(ctrl_frame, text="DURAKLAT", command=self.pause_recovery, state="disabled", bg="#CED6E0", fg=self.text_dark, borderwidth=0, padx=15, pady=5, font=("Segoe UI", 9, "bold"))
-        self.pause_btn.pack(side=tk.LEFT, padx=(0, 10))
+        self.pause_btn = tk.Button(ctrl_frame, text="DURAKLAT", command=self.pause_recovery, state="disabled", bg="#CED6E0", fg=self.text_dark, borderwidth=0, padx=12, pady=4, font=("Segoe UI", 8, "bold"))
+        self.pause_btn.pack(side=tk.LEFT, padx=(0, 6))
         
-        self.resume_btn = tk.Button(ctrl_frame, text="DEVAM ET", command=self.resume_recovery, state="disabled", bg="#CED6E0", fg=self.text_dark, borderwidth=0, padx=15, pady=5, font=("Segoe UI", 9, "bold"))
-        self.resume_btn.pack(side=tk.LEFT, padx=(0, 10))
-        self.backup_btn = tk.Button(ctrl_frame, text="💾 YEDEK AL", command=self.manual_backup, state="disabled", bg="#CED6E0", fg=self.text_dark, borderwidth=0, padx=15, pady=5, font=("Segoe UI", 9, "bold"))
-        self.backup_btn.pack(side=tk.LEFT, padx=(0, 10))
+        self.resume_btn = tk.Button(ctrl_frame, text="DEVAM ET", command=self.resume_recovery, state="disabled", bg="#CED6E0", fg=self.text_dark, borderwidth=0, padx=12, pady=4, font=("Segoe UI", 8, "bold"))
+        self.resume_btn.pack(side=tk.LEFT, padx=(0, 6))
+        self.backup_btn = tk.Button(ctrl_frame, text="💾 YEDEK AL", command=self.manual_backup, state="disabled", bg="#CED6E0", fg=self.text_dark, borderwidth=0, padx=12, pady=4, font=("Segoe UI", 8, "bold"))
+        self.backup_btn.pack(side=tk.LEFT, padx=(0, 6))
 
         self.bar_detail_btn = tk.Button(
             ctrl_frame, 
@@ -522,18 +525,15 @@ class LayoutMixin:
             bg=self.accent_blue, 
             fg=self.text_white, 
             borderwidth=0, 
-            padx=15, 
-            pady=5, 
-            font=("Segoe UI", 9, "bold"),
+            padx=12, 
+            pady=4, 
+            font=("Segoe UI", 8, "bold"),
             cursor="hand2"
         )
-        self.bar_detail_btn.pack(side=tk.RIGHT, padx=(10, 0))
+        self.bar_detail_btn.pack(side=tk.RIGHT, padx=(6, 0))
         
-        self.stop_btn = tk.Button(ctrl_frame, text="TARAMAYI BİTİR", command=self.stop_recovery, state="disabled", bg="#FF4757", fg=self.text_white, borderwidth=0, padx=15, pady=5, font=("Segoe UI", 9, "bold"))
-        # self.stop_btn.pack(side=tk.LEFT, padx=(0, 20)) # Removed to hide the stop button per request
-        
-        self.inspect_btn = tk.Button(ctrl_frame, text="🔎 Bulunan Öğeleri İnceleyin", command=self.show_file_view, bg=self.accent_blue, fg=self.text_white, borderwidth=0, padx=20, pady=5, font=("Segoe UI", 9, "bold"))
-        self.inspect_btn.pack(side=tk.RIGHT, padx=(10, 0))
+        self.inspect_btn = tk.Button(ctrl_frame, text="🔎 Bulunan Öğeleri İnceleyin", command=self.show_file_view, bg=self.accent_blue, fg=self.text_white, borderwidth=0, padx=14, pady=4, font=("Segoe UI", 8, "bold"), cursor="hand2")
+        self.inspect_btn.pack(side=tk.RIGHT, padx=(6, 0))
         
         self.status_lbl = tk.Label(self.dash_left_frame, text="Hazır.", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 9))
         self.status_lbl.pack(side=tk.BOTTOM, anchor="w", pady=(10, 0))
@@ -1149,13 +1149,8 @@ class LayoutMixin:
 
     def toggle_dash_adv_panel(self):
         if self.dash_show_adv_var.get():
-            self.parallel_bar.pack(fill=tk.X, pady=(0, 10), before=self.scan_header_lbl)
-            self.custom_range_bar.pack(fill=tk.X, pady=(0, 10), before=self.scan_header_lbl)
-            self.category_select_bar.pack(fill=tk.X, pady=(0, 20), before=self.scan_header_lbl)
-            self.toggle_parallel_options()
+            self.category_select_bar.pack(fill=tk.X, pady=(0, 15), before=self.scan_header_lbl)
         else:
-            self.parallel_bar.pack_forget()
-            self.custom_range_bar.pack_forget()
             self.category_select_bar.pack_forget()
 
     def toggle_parallel_options(self):
@@ -1891,6 +1886,193 @@ class LayoutMixin:
         reset_block_btn = tk.Button(btn_frame, text="Seçiliyi Sıfırla", command=reset_selected_blocks, bg="#FF4757", fg="#FFFFFF", borderwidth=0, font=("Segoe UI", 9, "bold"), padx=15, pady=8, cursor="hand2")
         reset_block_btn.pack(side=tk.LEFT)
 
+    def show_scan_progress_modal(self):
+        from tkinter import Toplevel
+        
+        if getattr(self, "scan_modal", None) and self.scan_modal.winfo_exists():
+            self.scan_modal.lift()
+            return
+
+        self.scan_modal = Toplevel(self)
+        self.scan_modal.title("⚡ NovaRecovery - Klasör Yapısı ve Canlı Tarama Paneli")
+        self.scan_modal.geometry("960x680")
+        self.scan_modal.configure(bg="#1E1E24")
+        self.scan_modal.transient(self)
+        
+        # Header title
+        header_frame = tk.Frame(self.scan_modal, bg="#1E1E24", padx=20, pady=12)
+        header_frame.pack(fill=tk.X)
+        
+        selected_disp = self.drive_var.get() if hasattr(self, "drive_var") and self.drive_var.get() else "Seagate FireCuda HDD (1863.02 GB)"
+        clean_name = selected_disp.split(":")[1].strip() if ":" in selected_disp else selected_disp
+        drive_total_gb = (self.active_drive_size / (1024 * 1024 * 1024)) if getattr(self, "active_drive_size", 0) > 0 else 1863.02
+        
+        title_lbl = tk.Label(
+            header_frame, 
+            text="⚡ Klasör Yapısı ve Canlı Disk Tarama Paneli", 
+            bg="#1E1E24", 
+            fg="#00CEC9", 
+            font=("Segoe UI", 14, "bold")
+        )
+        title_lbl.pack(anchor="w")
+        
+        sub_lbl = tk.Label(
+            header_frame, 
+            text=f'Seçili Cihaz: {clean_name}  |  Toplam Kapasite: {drive_total_gb:.2f} GB ({drive_total_gb/1024:.2f} TB)', 
+            bg="#1E1E24", 
+            fg="#A4B0BE", 
+            font=("Segoe UI", 10, "bold")
+        )
+        sub_lbl.pack(anchor="w", pady=(3, 0))
+
+        # Main Start / Control bar inside modal
+        action_bar = tk.Frame(self.scan_modal, bg="#2F3542", padx=15, pady=10)
+        action_bar.pack(fill=tk.X, padx=20, pady=(0, 10))
+
+        self.modal_start_btn = tk.Button(
+            action_bar, 
+            text="🚀 TARAMAYI BAŞLAT", 
+            command=self.trigger_modal_start_recovery, 
+            bg="#10AC84", 
+            fg="#FFFFFF", 
+            font=("Segoe UI", 11, "bold"), 
+            padx=20, 
+            pady=6, 
+            borderwidth=0,
+            cursor="hand2"
+        )
+        self.modal_start_btn.pack(side=tk.LEFT, padx=(0, 15))
+
+        self.modal_heartbeat_lbl = tk.Label(
+            action_bar, 
+            text="🟢 Canlı Sayaç: 0 sn (Beklemede)", 
+            bg="#1E1E24", 
+            fg="#00FF66", 
+            font=("Consolas", 10, "bold"), 
+            padx=12, 
+            pady=6
+        )
+        self.modal_heartbeat_lbl.pack(side=tk.LEFT)
+
+        target_dir_disp = getattr(self, "selected_output_dir", r"C:\kurtarilan_dosyalar")
+        target_lbl = tk.Label(
+            action_bar, 
+            text=f"Hedef: {target_dir_disp}", 
+            bg="#2F3542", 
+            fg="#FFFFFF", 
+            font=("Segoe UI", 9)
+        )
+        target_lbl.pack(side=tk.RIGHT)
+
+        # Progress card
+        card_frame = tk.Frame(self.scan_modal, bg="#2F3542", padx=20, pady=12, highlightthickness=1, highlightbackground="#57606F")
+        card_frame.pack(fill=tk.X, padx=20, pady=(0, 10))
+
+        pct_row = tk.Frame(card_frame, bg="#2F3542")
+        pct_row.pack(fill=tk.X, pady=(0, 8))
+
+        self.modal_pct_lbl = tk.Label(pct_row, text="%0.0", bg="#2F3542", fg="#00CEC9", font=("Segoe UI", 22, "bold"))
+        self.modal_pct_lbl.pack(side=tk.LEFT)
+
+        self.modal_gb_lbl = tk.Label(pct_row, text=f"Taranan: 0.00 GB / {drive_total_gb:.2f} GB", bg="#2F3542", fg="#FFFFFF", font=("Segoe UI", 11, "bold"))
+        self.modal_gb_lbl.pack(side=tk.RIGHT)
+
+        self.modal_progress_bar = ttk.Progressbar(card_frame, orient="horizontal", mode="determinate")
+        self.modal_progress_bar.pack(fill=tk.X, pady=(0, 10))
+
+        # Stat pills row
+        pills_row = tk.Frame(card_frame, bg="#2F3542")
+        pills_row.pack(fill=tk.X)
+
+        self.modal_speed_lbl = tk.Label(pills_row, text="⚡ Hız: 0.00 MB/s", bg="#1E1E24", fg="#FFFFFF", font=("Segoe UI", 9, "bold"), padx=10, pady=4)
+        self.modal_speed_lbl.pack(side=tk.LEFT, padx=(0, 10))
+
+        self.modal_elapsed_lbl = tk.Label(pills_row, text="⏱️ Süre: 00:00", bg="#1E1E24", fg="#FFFFFF", font=("Segoe UI", 9, "bold"), padx=10, pady=4)
+        self.modal_elapsed_lbl.pack(side=tk.LEFT, padx=(0, 10))
+
+        self.modal_eta_lbl = tk.Label(pills_row, text="⏳ Kalan: Hesaplanıyor...", bg="#1E1E24", fg="#FFFFFF", font=("Segoe UI", 9, "bold"), padx=10, pady=4)
+        self.modal_eta_lbl.pack(side=tk.LEFT, padx=(0, 10))
+
+        self.modal_count_lbl = tk.Label(pills_row, text="📁 Bulunan: 0 dosya (0 MB)", bg="#1E1E24", fg="#FF9F43", font=("Segoe UI", 9, "bold"), padx=10, pady=4)
+        self.modal_count_lbl.pack(side=tk.LEFT)
+
+        # Live Console Activity Feed
+        log_frame = tk.LabelFrame(self.scan_modal, text=" Canlı Taranan Dosyalar ve Klasör Yapısı ", bg="#1E1E24", fg="#FFFFFF", font=("Segoe UI", 9, "bold"), padx=10, pady=8)
+        log_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=(0, 10))
+
+        self.modal_log_text = tk.Text(log_frame, bg="#000000", fg="#00FF66", font=("Consolas", 9), borderwidth=0, highlightthickness=0, wrap="char")
+        self.modal_log_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        modal_scroll = ttk.Scrollbar(log_frame, orient="vertical", command=self.modal_log_text.yview)
+        modal_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        self.modal_log_text.config(yscrollcommand=modal_scroll.set)
+
+        self.modal_log_text.insert(tk.END, f"[*] {clean_name} tarama paneli hazır.\n")
+        self.modal_log_text.insert(tk.END, "[*] Taramayı başlatmak için yukarıdaki '🚀 TARAMAYI BAŞLAT' butonuna tıklayın.\n")
+
+        # Populate current virtual_files if already found
+        if hasattr(self, "virtual_files") and self.virtual_files:
+            for f in self.virtual_files[:50]:
+                p_name = f.get("custom_path") or f.get("name")
+                sz_str = self.format_size(f.get("size", 0))
+                self.modal_log_text.insert(tk.END, f"[✔] {p_name} ({sz_str}) - Tarih: {f.get('date', '-')}\n")
+            self.modal_log_text.see(tk.END)
+
+        # Action Buttons at Bottom
+        btn_frame = tk.Frame(self.scan_modal, bg="#1E1E24", padx=20, pady=10)
+        btn_frame.pack(fill=tk.X, side=tk.BOTTOM)
+
+        self.modal_inspect_btn = tk.Button(
+            btn_frame, 
+            text="🔎 BULUNAN DOSYALARI İNCELE & GERİ YÜKLE", 
+            command=lambda: (self.scan_modal.destroy(), self.show_file_view()), 
+            bg="#0084FF", 
+            fg="#FFFFFF", 
+            font=("Segoe UI", 10, "bold"), 
+            padx=15, 
+            pady=6, 
+            borderwidth=0,
+            cursor="hand2"
+        )
+        self.modal_inspect_btn.pack(side=tk.LEFT)
+
+        close_btn = tk.Button(
+            btn_frame, 
+            text="✖️ KAPAT (Arka Planda Devam Et)", 
+            command=self.scan_modal.destroy, 
+            bg="#57606F", 
+            fg="#FFFFFF", 
+            font=("Segoe UI", 9, "bold"), 
+            padx=12, 
+            pady=6, 
+            borderwidth=0,
+            cursor="hand2"
+        )
+        close_btn.pack(side=tk.RIGHT)
+
+        # Start modal heartbeat ticker loop
+        self.modal_ticker_sec = 0
+        self.update_modal_ticker_loop()
+
+    def trigger_modal_start_recovery(self):
+        if hasattr(self, "modal_start_btn"):
+            self.modal_start_btn.config(state="disabled", bg="#57606F", text="⏳ TARAMA ÇALIŞIYOR...")
+        if hasattr(self, "modal_log_text"):
+            self.modal_log_text.insert(tk.END, "\n[🚀] Taramaya başlandı! Sektörler ve MFT indeksi taranıyor...\n")
+            self.modal_log_text.see(tk.END)
+        self.start_recovery()
+
+    def update_modal_ticker_loop(self):
+        if getattr(self, "scan_modal", None) and self.scan_modal.winfo_exists():
+            if getattr(self, "is_scanning", False):
+                self.modal_ticker_sec = getattr(self, "modal_ticker_sec", 0) + 1
+                if hasattr(self, "modal_heartbeat_lbl"):
+                    self.modal_heartbeat_lbl.config(text=f"🟢 Canlı Sayaç: {self.modal_ticker_sec} sn (Motor Çalışıyor ✅)")
+            else:
+                if hasattr(self, "modal_heartbeat_lbl"):
+                    self.modal_heartbeat_lbl.config(text="🟢 Canlı Sayaç: Beklemede")
+            self.after(1000, self.update_modal_ticker_loop)
+
 
 
     def populate_detail_map_tree(self, tree):
@@ -2022,6 +2204,9 @@ class LayoutMixin:
             self.lbl_drive_capacity.config(text=f"Kapasite: {size_gb / 1024:.2f} TB")
         else:
             self.lbl_drive_capacity.config(text=f"Kapasite: {size_gb} GB")
+            
+        if hasattr(self, "lbl_drive_scanned") and self.lbl_drive_scanned:
+            self.lbl_drive_scanned.config(text="Taranan Alan: 0.00 GB (%0.0)", fg=self.text_dark)
             
         # Update active drive reference
         if hasattr(self, "drives_map") and self.drives_map:

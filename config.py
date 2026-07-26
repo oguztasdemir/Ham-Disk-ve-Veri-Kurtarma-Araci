@@ -4,6 +4,7 @@
 APP_NAME = "NovaRecovery"
 APP_VERSION = "2.1.0"
 APP_DESCRIPTION = "Profesyonel Veri Kurtarma ve File Carver Yazılımı"
+MIN_FILE_SIZE_BYTES = 100 * 1024  # 100 KB minimum size threshold to filter junk content
 
 # Dark Theme Colors matching Disk Drill style
 BG_DARK = "#1E1E24"

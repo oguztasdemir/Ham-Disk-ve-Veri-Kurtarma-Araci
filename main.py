@@ -13,9 +13,20 @@ def run_as_admin():
         import os
         script_dir = os.path.dirname(os.path.abspath(__file__))
         # Relaunch the script with admin rights
-        ctypes.windll.shell32.ShellExecuteW(
+        ret = ctypes.windll.shell32.ShellExecuteW(
             None, "runas", sys.executable, " ".join([f'"{arg}"' for arg in sys.argv]), script_dir, 1
         )
+        if ret <= 32:
+            try:
+                ctypes.windll.user32.MessageBoxW(
+                    0, 
+                    "Ham sektör okuma ve disk kurtarma işlemleri için yönetici yetkileri gereklidir.\nLütfen uygulamayı yönetici olarak çalıştırın.", 
+                    "Yönetici Yetkisi Gerekli", 
+                    0x30
+                )
+            except:
+                pass
+            sys.exit(1)
         sys.exit(0)
 
 def hide_console():
@@ -36,13 +47,16 @@ def enforce_single_instance():
             with open(PID_FILE, "r") as f:
                 old_pid = int(f.read().strip())
             
-            # Check if the process exists and kill it
-            try:
-                os.kill(old_pid, 0)
-                os.system(f"taskkill /F /PID {old_pid} >nul 2>&1")
-                time.sleep(0.5)
-            except OSError:
-                pass
+            if old_pid != os.getpid():
+                # Check if process is running and belongs to python.exe/main.py before terminating
+                import subprocess
+                try:
+                    out = subprocess.check_output(f'tasklist /FI "PID eq {old_pid}"', shell=True, text=True, errors="ignore")
+                    if "python" in out.lower() or "main" in out.lower():
+                        subprocess.run(f"taskkill /F /PID {old_pid} >nul 2>&1", shell=True)
+                        time.sleep(0.3)
+                except:
+                    pass
         except:
             pass
             
@@ -81,10 +95,10 @@ def check_dependencies():
 if __name__ == "__main__":
     import os
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    enforce_single_instance()
     run_as_admin()
-    hide_console()
+    enforce_single_instance()
     check_dependencies()
+    hide_console()
     
     try:
         from ui import RecoveryApp

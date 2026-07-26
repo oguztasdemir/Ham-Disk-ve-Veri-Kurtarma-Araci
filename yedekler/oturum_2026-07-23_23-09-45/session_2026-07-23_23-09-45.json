@@ -1,0 +1,1427 @@
+{
+    "timestamp": "23.07.2026 23:18:35",
+    "kaynak_disk_adi": "Seagate FireCuda HDD",
+    "hedef_disk_adi": "USB SanDisk 3.2Gen1",
+    "kaynak_disk": "\\\\.\\PhysicalDrive1",
+    "hedef_disk": "D:\\kurtarilan_dosyalar",
+    "toplam_gb": 18.6302,
+    "tamamlanan_gb": 6.0078,
+    "ilerleme_yuzdesi": 32.25,
+    "toplam_kurtarilan_dosya": 0,
+    "aktarilan_dosya_sayisi": 0,
+    "gecen_sure_dakika": 0.0,
+    "active_drive": "\\\\.\\PhysicalDrive1",
+    "active_drive_size": 2000398933504,
+    "resume_offset": 0,
+    "virtual_files": [],
+    "elapsed_seconds": 0.0,
+    "scan_source": "dashboard",
+    "selected_output_dir": "D:\\kurtarilan_dosyalar",
+    "use_parallel": false,
+    "worker_count": "4",
+    "segment_size_gb": "100",
+    "search_unscanned": false,
+    "scan_from_end": false,
+    "segment_progress": {
+        "0": 2214592512,
+        "160031914496": 4236247040
+    },
+    "segment_bounds": {
+        "0": 107374182400,
+        "107374182400": 120023936000,
+        "160031914496": 180035904000
+    },
+    "ntfs_deleted_files": {
+        "16216064": [
+            {
+                "name": "$T",
+                "size": 1048576,
+                "custom_path": "\u1000\u0307$E/\u1000$R/\u1000$T",
+                "date": "22.06.2026 15:34",
+                "modified_epoch": 1782131676.4101536
+            }
+        ],
+        "17264640": [
+            {
+                "name": "$TxfLog.blfH@",
+                "size": 65536,
+                "custom_path": "\u1000\u0307$E/\u1000$R/\u1000$T",
+                "date": "22.06.2026 15:34",
+                "modified_epoch": 1782131676.460463
+            }
+        ],
+        "17330176": [
+            {
+                "name": "$$TxfLogContainer000000000000",
+                "size": 10485760,
+                "custom_path": "\u1000\u0307$E/\u1000$R/\u1000$T",
+                "date": "22.06.2026 15:34",
+                "modified_epoch": 1782131676.4945076
+            }
+        ],
+        "27815936": [
+            {
+                "name": "$$TxfLogContainer000000000000",
+                "size": 10485760,
+                "custom_path": "\u1000\u0307$E/\u1000$R/\u1000$T",
+                "date": "22.06.2026 15:34",
+                "modified_epoch": 1782131676.8053653
+            }
+        ],
+        "3222312240": [
+            {
+                "name": "IndexerVolumeGuidhL",
+                "size": 76,
+                "custom_path": "\u1000Sy",
+                "date": "22.06.2026 15:34",
+                "modified_epoch": 1782131677.6027348
+            }
+        ],
+        "3222313256": [
+            {
+                "name": "WPSettings.dat(",
+                "size": 12,
+                "custom_path": "\u1000Sy",
+                "date": "22.06.2026 15:34",
+                "modified_epoch": 1782131677.7786345
+            }
+        ],
+        "38322176": [
+            {
+                "name": "tracking.logH@",
+                "size": 20480,
+                "custom_path": "\u1000Sy",
+                "date": "22.06.2026 15:38",
+                "modified_epoch": 1782131895.5233688
+            }
+        ],
+        "38903808": [
+            {
+                "name": ";depot_1899671_28217595031431",
+                "size": 1567952,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828675.7412436
+            }
+        ],
+        "3222325536": [
+            {
+                "name": "desktop.ini\u2e5b\u6853\u6c65\u436c\u616c",
+                "size": 129,
+                "custom_path": null,
+                "date": "22.06.2026 15:38",
+                "modified_epoch": 1782131922.124879
+            }
+        ],
+        "3222327584": [
+            {
+                "name": "desktop.inik\u2e5b\u6853\u6c65\u436c\u616c",
+                "size": 107,
+                "custom_path": null,
+                "date": "22.06.2026 15:39",
+                "modified_epoch": 1782131945.8816204
+            }
+        ],
+        "3222329632": [
+            {
+                "name": "desktop.inij\u2e5b\u6853\u6c65\u436c\u616c",
+                "size": 106,
+                "custom_path": null,
+                "date": "22.06.2026 15:39",
+                "modified_epoch": 1782131946.0486217
+            }
+        ],
+        "3222334768": [
+            {
+                "name": "libraryfolder.vdf\u00a8",
+                "size": 141,
+                "custom_path": null,
+                "date": "22.06.2026 15:40",
+                "modified_epoch": 1782132008.4836743
+            }
+        ],
+        "38354944": [
+            {
+                "name": "steam.dllH@",
+                "size": 545944,
+                "custom_path": null,
+                "date": "22.06.2026 15:40",
+                "modified_epoch": 1782132008.6124127
+            }
+        ],
+        "38342656": [
+            {
+                "name": "=LAPTOP-OLV6COHD_User_5f5b05a",
+                "size": 2478,
+                "custom_path": null,
+                "date": "22.06.2026 15:47",
+                "modified_epoch": 1782132456.0558136
+            }
+        ],
+        "279994368": [
+            {
+                "name": "state_1174180.filesH",
+                "size": 5464,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.3154483
+            }
+        ],
+        "40472576": [
+            {
+                "name": "Rockstar-Games-Launcher.exe",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828675.9574108
+            }
+        ],
+        "152547328": [
+            {
+                "name": "Social-Club-Setup.exeH",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828675.9593873
+            }
+        ],
+        "3222342976": [
+            {
+                "name": "state_1174180_1899671.patch",
+                "size": 24,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828677.0769048
+            }
+        ],
+        "3093753856": [
+            {
+                "name": "installscript.vdfH",
+                "size": 746,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828677.7233572
+            }
+        ],
+        "280002560": [
+            {
+                "name": "d3d12.dllH\u01d3@",
+                "size": 1913416,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.4665484
+            }
+        ],
+        "3432251392": [
+            {
+                "name": "anim_0.rpfH\u7c03@",
+                "size": 618659840,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.4675465
+            }
+        ],
+        "281919488": [
+            {
+                "name": "common_0.rpfH\u080d",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.469548
+            }
+        ],
+        "290365440": [
+            {
+                "name": "data_0.rpfH\u1226@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.4705455
+            }
+        ],
+        "577835008": [
+            {
+                "name": "dxilconv7.dllH\u0164",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.4715495
+            }
+        ],
+        "579301376": [
+            {
+                "name": "ffx_fsr2_api_dx12_x64.dll",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.472545
+            }
+        ],
+        "582234112": [
+            {
+                "name": "ffx_fsr2_api_vk_x64.dllH",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.4735448
+            }
+        ],
+        "584634368": [
+            {
+                "name": "hd_0.rpfH@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.4755728
+            }
+        ],
+        "1617498112": [
+            {
+                "name": "levels_0.rpfH\u497c",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.4755728
+            }
+        ],
+        "7588823040": [
+            {
+                "name": "levels_1.rpfH\uc458",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.4765499
+            }
+        ],
+        "16116207616": [
+            {
+                "name": "levels_2.rpfH\ucda4",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.4790528
+            }
+        ],
+        "24653340672": [
+            {
+                "name": "levels_3.rpfH\ud7bc",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.480599
+            }
+        ],
+        "33201057792": [
+            {
+                "name": "levels_4.rpfH\ucfd7",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.4816236
+            }
+        ],
+        "41740496896": [
+            {
+                "name": "levels_5.rpfP\uce1e",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.482627
+            }
+        ],
+        "50278129664": [
+            {
+                "name": "levels_6.rpfP\ua9a2",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.4843633
+            }
+        ],
+        "58777505792": [
+            {
+                "name": "levels_7.rpfP\u5639",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.4857593
+            }
+        ],
+        "65847242752": [
+            {
+                "name": "movies_0.rpfP\uc3cc",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.4868803
+            }
+        ],
+        "1962991616": [
+            {
+                "name": "nvngx_dlss.dllH\u0dc6",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.4888892
+            }
+        ],
+        "1977438208": [
+            {
+                "name": "oo2core_5_win64.dllH",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.4898887
+            }
+        ],
+        "1978384384": [
+            {
+                "name": "packs_0.rpfH\ucaf9@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.4908893
+            }
+        ],
+        "67931602944": [
+            {
+                "name": "packs_1.rpfP\u1fed@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.491887
+            }
+        ],
+        "2996527104": [
+            {
+                "name": "VulkanRT-1.1.108.0-Installer",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.4928885
+            }
+        ],
+        "72260050944": [
+            {
+                "name": "rowpack_0.rpfP\u60e5",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.4938893
+            }
+        ],
+        "72630091776": [
+            {
+                "name": "textures_0.rpfP\u3818",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.4943955
+            }
+        ],
+        "75910139904": [
+            {
+                "name": "textures_1.rpfP\u6e08",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.4955451
+            }
+        ],
+        "2997424128": [
+            {
+                "name": "crashpad_handler.exeH",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.4985507
+            }
+        ],
+        "2998169600": [
+            {
+                "name": "metadata.datH\u01d7",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.500556
+            }
+        ],
+        "3000102912": [
+            {
+                "name": "bink2w64.dllH_",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.501552
+            }
+        ],
+        "3000496128": [
+            {
+                "name": "appdata0_update.rpfH",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5025525
+            }
+        ],
+        "3003662336": [
+            {
+                "name": "PlayRDR2.exeH{",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5025525
+            }
+        ],
+        "3004170240": [
+            {
+                "name": "RDR2.exeH\u5569@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.504061
+            }
+        ],
+        "79515181056": [
+            {
+                "name": "shaders_x64.rpfP",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5050693
+            }
+        ],
+        "79749103616": [
+            {
+                "name": "update_1.rpfP\u8e77",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5050693
+            }
+        ],
+        "82582847488": [
+            {
+                "name": "update_2.rpfP\u9100",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5060663
+            }
+        ],
+        "82734895104": [
+            {
+                "name": "update_3.rpfH\u7e3e",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.50707
+            }
+        ],
+        "82867273728": [
+            {
+                "name": "update_4.rpfP\u81ae",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5080698
+            }
+        ],
+        "84882305024": [
+            {
+                "name": "dlc.rpfH\u7258@\u9000",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5100677
+            }
+        ],
+        "85002207232": [
+            {
+                "name": "dlc.rpfP\u7784@\u5000",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5130682
+            }
+        ],
+        "87811887104": [
+            {
+                "name": "dlc.rpfP\ud2fa@\ub000",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5150795
+            }
+        ],
+        "88301551616": [
+            {
+                "name": "dlc.rpfP\ub68b@\uc000",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5160737
+            }
+        ],
+        "89298272256": [
+            {
+                "name": "dlc.rpfP\ub85b@\uc000",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5180776
+            }
+        ],
+        "92175941632": [
+            {
+                "name": "dlc.rpfP\uc276@\u7000",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5200727
+            }
+        ],
+        "94258900992": [
+            {
+                "name": "dlc.rpfP\u4fe6@\u7000",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5220747
+            }
+        ],
+        "95684861952": [
+            {
+                "name": "dlc.rpfP\ud095@\u6000",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5240748
+            }
+        ],
+        "96172015616": [
+            {
+                "name": "dlc.rpfP\ud775@\u6000",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5250726
+            }
+        ],
+        "96666378240": [
+            {
+                "name": "dlc.rpfP\u27e3@\u4000",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.527073
+            }
+        ],
+        "96976642048": [
+            {
+                "name": "dlc.rpfP\u307d@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5285823
+            }
+        ],
+        "99711844352": [
+            {
+                "name": "dlc.rpfP@\ua000",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5305886
+            }
+        ],
+        "100772323328": [
+            {
+                "name": "dlc.rpfP\u1a36@\u7000",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5315888
+            }
+        ],
+        "101068247040": [
+            {
+                "name": "dlc.rpfP\u80d0@\u1000",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.533588
+            }
+        ],
+        "101471756288": [
+            {
+                "name": "dlc.rpfH\u7a0b@\uc000",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5355885
+            }
+        ],
+        "101599731712": [
+            {
+                "name": "dlc.rpfP\u3ad0@\u1000",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.536589
+            }
+        ],
+        "101929840640": [
+            {
+                "name": "dlc.rpfH\u3756@\u7000",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5385923
+            }
+        ],
+        "101987868672": [
+            {
+                "name": "dlc.rpfH\u16f7@\u8000",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5400977
+            }
+        ],
+        "102011953152": [
+            {
+                "name": "dlc.rpfH\u05e6@\u7000",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5411043
+            }
+        ],
+        "102018142208": [
+            {
+                "name": "dlc.rpfH\u6b29@\ua000",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.543107
+            }
+        ],
+        "102130511872": [
+            {
+                "name": "dlc.rpfH\u012f@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5451033
+            }
+        ],
+        "102131757056": [
+            {
+                "name": "dlc.rpfH\u656a@\ub000",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5461037
+            }
+        ],
+        "102238101504": [
+            {
+                "name": "dlc.rpfP\u813e@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5471053
+            }
+        ],
+        "102642061312": [
+            {
+                "name": "dlc.rpfH\u034b@\uc000",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5491028
+            }
+        ],
+        "102645518336": [
+            {
+                "name": "dlc.rpfH\u040c@\ud000",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5511029
+            }
+        ],
+        "102649765888": [
+            {
+                "name": "audio_rel.rpfH\u05d1",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.553105
+            }
+        ],
+        "102655868928": [
+            {
+                "name": "ANIMALS_FAR.rpfH\u439f",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.554104
+            }
+        ],
+        "102726778880": [
+            {
+                "name": "ANIMALS_HORSES.rpfH",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5551057
+            }
+        ],
+        "102744367104": [
+            {
+                "name": "ANIMALS_NEAR.rpfP",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5561068
+            }
+        ],
+        "102969659392": [
+            {
+                "name": "CUTSCENE_MASTERED_ONLY.rpf",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5571043
+            }
+        ],
+        "105315438592": [
+            {
+                "name": "INTERACTIVE_MUSIC.rpfH",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5591028
+            }
+        ],
+        "105322397696": [
+            {
+                "name": "MUSIC_2T.rpfP\ud240",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5591028
+            }
+        ],
+        "105542864896": [
+            {
+                "name": "ONESHOT_AMBIENCE.rpfH",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5611045
+            }
+        ],
+        "105613451264": [
+            {
+                "name": "PEDS_00.rpfP\u64ef@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.562112
+            }
+        ],
+        "105987727360": [
+            {
+                "name": "PEDS_01.rpfP\u623f@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.562112
+            }
+        ],
+        "106359185408": [
+            {
+                "name": "PEDS_02.rpfP\u622d@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.564114
+            }
+        ],
+        "106730569728": [
+            {
+                "name": "PEDS_03.rpfP\ub0fb@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5651112
+            }
+        ],
+        "107184586752": [
+            {
+                "name": "PEDS_04.rpfP\u4cfc@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5651112
+            }
+        ],
+        "107802185728": [
+            {
+                "name": "PEDS_05.rpfP@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.566108
+            }
+        ],
+        "108037828608": [
+            {
+                "name": "PEDS_06.rpfP\ufffc@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5671084
+            }
+        ],
+        "108306251776": [
+            {
+                "name": "PEDS_07.rpfP\u8194@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5681093
+            }
+        ],
+        "108978999296": [
+            {
+                "name": "PEDS_08.rpfP\u05be@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5691133
+            }
+        ],
+        "109790330880": [
+            {
+                "name": "PEDS_09.rpfP\u7a2f@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5701103
+            }
+        ],
+        "110455324672": [
+            {
+                "name": "PEDS_10.rpfP\u1301@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5711098
+            }
+        ],
+        "112085868544": [
+            {
+                "name": "RDR3.Resident.rpfP",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5721123
+            }
+        ],
+        "112416079872": [
+            {
+                "name": "RESIDENT.rpfP",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5731091
+            }
+        ],
+        "112933740544": [
+            {
+                "name": "SCORE_01.rpfP\ucc24",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5741088
+            }
+        ],
+        "114221543424": [
+            {
+                "name": "SCORE_02.rpfP\ua4d0",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5751088
+            }
+        ],
+        "115468107776": [
+            {
+                "name": "SCORE_03.rpfP\u7dd7",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.57611
+            }
+        ],
+        "116405370880": [
+            {
+                "name": "SCORE_04.rpfP",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5771108
+            }
+        ],
+        "117467959296": [
+            {
+                "name": "SCORE_05.rpfP\u5296",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5786164
+            }
+        ],
+        "118628302848": [
+            {
+                "name": "SCORE_06.rpfP\ud4ac",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5796216
+            }
+        ],
+        "119119745024": [
+            {
+                "name": "SCRIPT.rpfP@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5806212
+            }
+        ],
+        "119625744384": [
+            {
+                "name": "SS_AM.rpfP\u39be@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5806212
+            }
+        ],
+        "121028472832": [
+            {
+                "name": "SS_NZ.rpfP\uc69e@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5816224
+            }
+        ],
+        "122578919424": [
+            {
+                "name": "STREAMED_AMBIENCE.rpfP",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5826223
+            }
+        ],
+        "122997493760": [
+            {
+                "name": "STREAMS.rpfP\u42a9@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5838206
+            }
+        ],
+        "123872702464": [
+            {
+                "name": "STREAMS_AS.rpfP\u7309",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.584819
+            }
+        ],
+        "124261765120": [
+            {
+                "name": "S_MISC.rpfP\uc782@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5858192
+            }
+        ],
+        "127692193792": [
+            {
+                "name": "S_RE.rpfP\uac51@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5868187
+            }
+        ],
+        "128409755648": [
+            {
+                "name": "S_VOFX.rpfH\u487e@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5878198
+            }
+        ],
+        "128485773312": [
+            {
+                "name": "THUNDER.rpfH\u1f72@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5888183
+            }
+        ],
+        "128518750208": [
+            {
+                "name": "VEHICLES.rpfH\u4a93",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5898244
+            }
+        ],
+        "128596951040": [
+            {
+                "name": "WALLA.rpfH\u1250@",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5918233
+            }
+        ],
+        "128616157184": [
+            {
+                "name": "WEAPONS_PLAYER.rpfH",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5928245
+            }
+        ],
+        "3222481216": [
+            {
+                "name": "state_1174180_1174181.patch",
+                "size": 24,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.5938234
+            }
+        ],
+        "38309888": [
+            {
+                "name": "state_1174180_1174182.patch",
+                "size": 13968,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.6580136
+            }
+        ],
+        "3222483264": [
+            {
+                "name": "state_1174180_1174183.patch",
+                "size": 24,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.8443527
+            }
+        ],
+        "3222484288": [
+            {
+                "name": "state_1174180_1174184.patch",
+                "size": 24,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.9116216
+            }
+        ],
+        "3222485312": [
+            {
+                "name": "state_1174180_1174185.patch",
+                "size": 24,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828676.9662812
+            }
+        ],
+        "3222486336": [
+            {
+                "name": "state_1174180_1174186.patch",
+                "size": 24,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828677.0228581
+            }
+        ],
+        "3093749760": [
+            {
+                "name": "%appmanifest_1174180.acf~RFca",
+                "size": 1487,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828677.1435297
+            }
+        ],
+        "3093762048": [
+            {
+                "name": "amd_ags_x64.dllH",
+                "size": 175600,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828678.7621408
+            }
+        ],
+        "38313984": [
+            {
+                "name": "appmanifest_1174180.acfH",
+                "size": 1487,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828682.1851203
+            }
+        ],
+        "3222490456": [
+            {
+                "name": "%appmanifest_1174180.acf~RFca3d",
+                "size": 0,
+                "custom_path": null,
+                "date": "23.07.2026 20:44",
+                "modified_epoch": 1784828682.2113166
+            }
+        ]
+    },
+    "block_copy_counts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+    ],
+    "block_unwanted_counts": [
+        2554,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        557,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+    ],
+    "use_custom_range": true,
+    "custom_block_range": "9",
+    "custom_start": "0",
+    "custom_end": "100",
+    "custom_unit": "GB",
+    "scan_start_offset": 160031914496,
+    "scan_end_offset": 180035904000,
+    "total_bytes": 20003989504,
+    "scanned_bytes": 6450839552,
+    "scanned_gb": 6.0078,
+    "total_gb": 18.6302,
+    "scanned_percent": 32.25,
+    "elapsed_minutes": 0.0,
+    "total_files_found": 0,
+    "exported_files_count": 0,
+    "files_summary": [],
+    "is_exit": true
+}

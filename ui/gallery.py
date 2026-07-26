@@ -14,6 +14,8 @@ try:
 except ImportError:
     HAS_PILLOW = False
 
+from config import CATEGORIES, APP_NAME
+
 class GalleryMixin:
     def init_folder_gallery_view(self):
         # State variables
@@ -48,45 +50,20 @@ class GalleryMixin:
         self.gallery_ctrl_frame.pack(fill=tk.X)
         
         tk.Label(self.gallery_ctrl_frame, text="Kurtarılacak Diski Seçin:", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 9, "bold")).pack(side=tk.LEFT, padx=(0, 10))
-        self.gallery_drive_var = tk.StringVar()
-        self.gallery_drive_combo = ttk.Combobox(self.gallery_ctrl_frame, textvariable=self.gallery_drive_var, state="readonly", width=30)
+        
+        self.gallery_drive_combo = ttk.Combobox(self.gallery_ctrl_frame, textvariable=self.drive_var, state="readonly", width=32)
         self.gallery_drive_combo.pack(side=tk.LEFT, padx=(0, 15))
         
-        self.gallery_start_btn = tk.Button(self.gallery_ctrl_frame, text="GALERİ TARAMASINI BAŞLAT", command=self.start_gallery_recovery, bg=self.accent_blue, fg=self.text_white, borderwidth=0, font=("Segoe UI", 9, "bold"), padx=15, pady=5, cursor="hand2")
+        self.gallery_start_btn = tk.Button(self.gallery_ctrl_frame, text="▶ TARAMAYI BAŞLAT", command=self.start_recovery, bg=self.accent_blue, fg=self.text_white, font=("Segoe UI", 9, "bold"), padx=15, pady=5, borderwidth=0)
         self.gallery_start_btn.pack(side=tk.LEFT, padx=(0, 10))
         
-        self.gallery_path_btn = tk.Button(self.gallery_ctrl_frame, text="Taşınacak Yeri Seçin", command=self.select_output_directory, bg="#F1F2F6", fg=self.text_dark, borderwidth=1, relief="solid", font=("Segoe UI", 9, "bold"), padx=12, pady=4, cursor="hand2")
-        self.gallery_path_btn.pack(side=tk.LEFT, padx=(10, 10))
-        
-        self.gallery_pause_btn = tk.Button(self.gallery_ctrl_frame, text="DURAKLAT", command=self.pause_gallery_recovery, state="disabled", bg="#CED6E0", fg=self.text_dark, borderwidth=0, font=("Segoe UI", 9, "bold"), padx=15, pady=5, cursor="hand2")
+        self.gallery_pause_btn = tk.Button(self.gallery_ctrl_frame, text="⏸ DURAKLAT", command=self.pause_recovery, state="disabled", bg="#CED6E0", fg=self.text_gray, font=("Segoe UI", 9, "bold"), padx=12, pady=5, borderwidth=0)
         self.gallery_pause_btn.pack(side=tk.LEFT, padx=(0, 10))
         
-        self.gallery_resume_btn = tk.Button(self.gallery_ctrl_frame, text="DEVAM ET", command=self.resume_gallery_recovery, state="disabled", bg="#CED6E0", fg=self.text_dark, borderwidth=0, font=("Segoe UI", 9, "bold"), padx=15, pady=5, cursor="hand2")
-        self.gallery_resume_btn.pack(side=tk.LEFT, padx=(0, 10))
+        self.gallery_stop_btn = tk.Button(self.gallery_ctrl_frame, text="⏹ DURDUR", command=self.stop_recovery, state="disabled", bg="#CED6E0", fg=self.text_gray, font=("Segoe UI", 9, "bold"), padx=12, pady=5, borderwidth=0)
+        self.gallery_stop_btn.pack(side=tk.LEFT, padx=(0, 15))
         
-        self.gallery_backup_btn = tk.Button(self.gallery_ctrl_frame, text="💾 YEDEK AL", command=self.manual_gallery_backup, state="disabled", bg="#CED6E0", fg=self.text_dark, borderwidth=0, font=("Segoe UI", 9, "bold"), padx=15, pady=5, cursor="hand2")
-        self.gallery_backup_btn.pack(side=tk.LEFT, padx=(0, 10))
-        
-        self.gallery_close_session_btn = tk.Button(
-            self.gallery_ctrl_frame, 
-            text="Oturumu Kapat", 
-            command=self.close_current_session, 
-            bg="#FF4757", 
-            fg=self.text_white, 
-            borderwidth=0, 
-            font=("Segoe UI", 9, "bold"), 
-            padx=12, 
-            pady=5, 
-            cursor="hand2"
-        )
-        
-        self.gallery_stop_btn = tk.Button(self.gallery_ctrl_frame, text="TARAMAYI DURDUR", command=self.stop_gallery_recovery, state="disabled", bg="#FF4757", fg=self.text_white, borderwidth=0, font=("Segoe UI", 9, "bold"), padx=15, pady=5, cursor="hand2")
-        # self.gallery_stop_btn.pack(side=tk.LEFT, padx=(0, 15)) # Removed to hide the stop button per request
-        
-        self.gallery_progress_bar = ttk.Progressbar(self.gallery_ctrl_frame, orient="horizontal", mode="determinate", length=150)
-        self.gallery_progress_bar.pack(side=tk.LEFT, padx=(0, 15))
-        
-        self.gallery_status_lbl = tk.Label(self.gallery_ctrl_frame, text="Hazır.", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 9))
+        self.gallery_status_lbl = tk.Label(self.gallery_ctrl_frame, text="Hazır", bg=self.content_bg, fg=self.text_gray, font=("Segoe UI", 9))
         self.gallery_status_lbl.pack(side=tk.LEFT)
         
         self.gallery_show_adv_var = tk.BooleanVar(value=False)
@@ -107,83 +84,32 @@ class GalleryMixin:
         self.gallery_adv_frame = tk.Frame(self.folder_gallery_view, bg=self.content_bg, padx=20, pady=10, bd=1, relief="ridge")
         # Packed only when visible
         
-        # Parallel scan options
-        p_frame = tk.Frame(self.gallery_adv_frame, bg=self.content_bg)
-        p_frame.pack(fill=tk.X, pady=5)
+        # Category selection frame for Gallery Mode
+        cat_frame = tk.Frame(self.gallery_adv_frame, bg=self.content_bg)
+        cat_frame.pack(fill=tk.X, pady=5)
         
-        self.gallery_parallel_cb = tk.Checkbutton(
-            p_frame,
-            text="Paralel Motorlar ile Parçalı Tara",
-            variable=self.use_parallel_var,
-            command=self.toggle_gallery_adv_options,
-            bg=self.content_bg,
-            fg=self.accent_blue,
-            activebackground=self.content_bg,
-            activeforeground=self.accent_blue,
+        tk.Label(
+            cat_frame, 
+            text="Taranacak Dosya Türleri:", 
+            bg=self.content_bg, 
+            fg=self.text_dark, 
             font=("Segoe UI", 9, "bold")
-        )
-        self.gallery_parallel_cb.pack(side=tk.LEFT, padx=(0, 15))
+        ).pack(side=tk.LEFT, padx=(0, 10))
         
-        tk.Label(p_frame, text="Motor Sayısı (Thread):", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 9)).pack(side=tk.LEFT, padx=(0, 5))
-        self.gallery_worker_combo = ttk.Combobox(
-            p_frame,
-            textvariable=self.worker_count_var,
-            values=[str(i) for i in range(1, 17)],
-            state="disabled",
-            width=5
-        )
-        self.gallery_worker_combo.pack(side=tk.LEFT, padx=(0, 15))
-        
-        tk.Label(p_frame, text="Parça Boyutu (GB):", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 9)).pack(side=tk.LEFT, padx=(0, 5))
-        self.gallery_segment_entry = tk.Entry(
-            p_frame,
-            textvariable=self.segment_size_gb_var,
-            state="disabled",
-            width=8
-        )
-        self.gallery_segment_entry.pack(side=tk.LEFT, padx=(0, 15))
-        
-        # Custom range options
-        r_frame = tk.Frame(self.gallery_adv_frame, bg=self.content_bg)
-        r_frame.pack(fill=tk.X, pady=5)
-        
-        self.gallery_custom_range_cb = tk.Checkbutton(
-            r_frame,
-            text="Özel Bellek Aralığı Tara",
-            variable=self.use_custom_range_var,
-            command=self.toggle_gallery_adv_options,
-            bg=self.content_bg,
-            fg=self.accent_blue,
-            activebackground=self.content_bg,
-            activeforeground=self.accent_blue,
-            font=("Segoe UI", 9, "bold")
-        )
-        self.gallery_custom_range_cb.pack(side=tk.LEFT, padx=(0, 15))
-        
-        self.gallery_custom_block_lbl = tk.Label(r_frame, text="Blok Aralığı (1-100):", bg=self.content_bg, fg=self.text_dark, font=("Segoe UI", 9, "bold"))
-        self.gallery_custom_block_lbl.pack(side=tk.LEFT, padx=(10, 5))
-        
-        self.gallery_custom_block_entry = tk.Entry(
-            r_frame,
-            textvariable=self.custom_block_range_var,
-            state="disabled",
-            width=10,
-            font=("Segoe UI", 9, "bold")
-        )
-        self.gallery_custom_block_entry.pack(side=tk.LEFT, padx=(0, 10))
-
-        
-        self.gallery_scan_from_end_cb = tk.Checkbutton(
-            r_frame,
-            text="Sondan Ara",
-            variable=self.scan_from_end_var,
-            bg=self.content_bg,
-            fg=self.accent_blue,
-            activebackground=self.content_bg,
-            activeforeground=self.accent_blue,
-            font=("Segoe UI", 9, "bold")
-        )
-        self.gallery_scan_from_end_cb.pack(side=tk.LEFT, padx=(15, 0))
+        for name, info in CATEGORIES.items():
+            if name in self.category_vars:
+                cb = tk.Checkbutton(
+                    cat_frame,
+                    text=f"{info['icon']} {name}",
+                    variable=self.category_vars[name],
+                    command=self.save_app_settings,
+                    bg=self.content_bg,
+                    fg=info['color'],
+                    activebackground=self.content_bg,
+                    activeforeground=info['color'],
+                    font=("Segoe UI", 9, "bold")
+                )
+                cb.pack(side=tk.LEFT, padx=(0, 15))
         
         # Main Pane splits Left (Folders/Files List) and Right (In-App Preview Panel)
         self.gallery_pane = tk.PanedWindow(self.folder_gallery_view, orient=tk.HORIZONTAL, bg="#E4E5EA", sashwidth=4)
@@ -289,31 +215,9 @@ class GalleryMixin:
 
     def toggle_gallery_adv_options(self):
         is_active_scanning = getattr(self, "is_scanning", False) and not getattr(self, "scan_paused", False)
-        if is_active_scanning:
-            # Disable inputs mid-scan only if actively scanning (not paused)
-            self.gallery_parallel_cb.config(state="disabled")
-            self.gallery_worker_combo.config(state="disabled")
-            self.gallery_segment_entry.config(state="disabled")
-            self.gallery_custom_range_cb.config(state="disabled")
-            self.gallery_custom_block_entry.config(state="disabled")
-            if hasattr(self, "gallery_unscanned_cb"):
-                self.gallery_unscanned_cb.config(state="disabled")
-            if hasattr(self, "gallery_scan_from_end_cb"):
-                self.gallery_scan_from_end_cb.config(state="disabled")
-        else:
-            self.gallery_parallel_cb.config(state="normal")
-            self.gallery_custom_range_cb.config(state="normal")
-            if hasattr(self, "gallery_unscanned_cb"):
-                self.gallery_unscanned_cb.config(state="normal")
-            if hasattr(self, "gallery_scan_from_end_cb"):
-                self.gallery_scan_from_end_cb.config(state="normal")
-            
-            state = "normal" if self.use_parallel_var.get() else "disabled"
-            self.gallery_worker_combo.config(state=state if state == "disabled" else "readonly")
-            self.gallery_segment_entry.config(state=state)
-            
-            range_state = "normal" if self.use_custom_range_var.get() else "disabled"
-            self.gallery_custom_block_entry.config(state=range_state)
+        for attr in ["gallery_parallel_cb", "gallery_worker_combo", "gallery_segment_entry", "gallery_custom_range_cb", "gallery_custom_block_entry", "gallery_unscanned_cb", "gallery_scan_from_end_cb"]:
+            if hasattr(self, attr):
+                getattr(self, attr).config(state="disabled" if is_active_scanning else "normal")
 
     def populate_gallery_sessions(self):
         if not hasattr(self, "gallery_sessions_list") or not self.gallery_sessions_list:
@@ -481,15 +385,6 @@ class GalleryMixin:
             messagebox.showwarning("Uyarı", "Lütfen kurtarma yapmak istediğiniz diski seçin!")
             return
             
-        if "seagate" not in selected_disp.lower():
-            messagebox.showerror(
-                "Kritik Hata: Uyumsuz Sürücü!",
-                "Hata: Seçilen sürücü Seagate marka değil!\n\n"
-                "Veri kurtarma işleminin yalnızca Seagate disk üzerinden yapılması planlanmıştır. "
-                "Lütfen doğru sürücüyü seçtiğinizden emin olun."
-            )
-            return
-            
         self.active_drive = self.drives_map.get(selected_disp)
         self.active_drive_size = self.drives_sizes_map.get(selected_disp, 0)
         if not self.active_drive:
@@ -552,33 +447,15 @@ class GalleryMixin:
 
         # Determine scanning boundaries
         start_offset = 0
-        end_offset = self.active_drive_size
-        
+        target_intervals = [(0, self.active_drive_size)]
         if self.use_custom_range_var.get():
-            try:
-                range_str = self.custom_block_range_var.get().strip()
-                if "-" in range_str:
-                    s_part, e_part = range_str.split("-", 1)
-                    start_block = int(s_part.strip())
-                    end_block = int(e_part.strip())
-                else:
-                    start_block = int(range_str)
-                    end_block = start_block
-                
-                start_block = max(1, min(100, start_block))
-                end_block = max(start_block, min(100, end_block))
-                
-                start_offset = int((start_block - 1) * (self.active_drive_size / 100))
-                end_offset = int(end_block * (self.active_drive_size / 100))
-                
-                start_offset = (start_offset // 512) * 512
-                end_offset = (end_offset // 512) * 512
-            except Exception as e:
-                print(f"Error parsing custom block range: {e}")
-                
-        self.scan_start_offset = start_offset
-        self.scan_end_offset = end_offset
-        
+            target_intervals = self.parse_block_ranges(self.custom_block_range_var.get(), self.active_drive_size)
+            self.scan_start_offset = target_intervals[0][0]
+            self.scan_end_offset = target_intervals[-1][1]
+        else:
+            self.scan_start_offset = 0
+            self.scan_end_offset = self.active_drive_size
+            
         # Initialize parallel segments
         self.segment_lock = threading.Lock()
         self.segment_progress = {}
@@ -601,20 +478,24 @@ class GalleryMixin:
             self.scan_segments = []
             if not hasattr(self, "segment_bounds"):
                 self.segment_bounds = {}
-            offset = start_offset
-            while offset < end_offset:
-                end = min(offset + segment_size_bytes, end_offset)
-                self.scan_segments.append((offset, end))
-                self.segment_progress[offset] = 0
-                self.segment_bounds[offset] = end
-                offset = end
+                
+            for start_offset, end_offset in target_intervals:
+                offset = start_offset
+                while offset < end_offset:
+                    end = min(offset + segment_size_bytes, end_offset)
+                    self.scan_segments.append((offset, end))
+                    self.segment_progress[offset] = 0
+                    self.segment_bounds[offset] = end
+                    offset = end
         else:
             worker_count = 1
-            self.scan_segments = [(start_offset, end_offset)]
-            self.segment_progress[start_offset] = 0
-            if not hasattr(self, "segment_bounds"):
-                self.segment_bounds = {}
-            self.segment_bounds[start_offset] = end_offset
+            self.scan_segments = []
+            for start_offset, end_offset in target_intervals:
+                self.scan_segments.append((start_offset, end_offset))
+                self.segment_progress[start_offset] = 0
+                if not hasattr(self, "segment_bounds"):
+                    self.segment_bounds = {}
+                self.segment_bounds[start_offset] = end_offset
             
         self.active_worker_count = worker_count
         
@@ -622,7 +503,20 @@ class GalleryMixin:
         # Only JPEGs and PNGs are requested to find valid images
         active_sigs = [sig for sig in FILE_SIGNATURES.values() if sig["category"] == "Resim"]
         
+        drive_total_gb = (self.active_drive_size / (1024 * 1024 * 1024)) if self.active_drive_size > 0 else 0.0
+        self.lbl_progress_val.config(text=f"%0.0 (0.00 GB / {drive_total_gb:.2f} GB)")
+        if hasattr(self, "lbl_entire_progress_val") and self.lbl_entire_progress_val:
+            self.lbl_entire_progress_val.config(text=f"%0.0 (0.00 GB / {drive_total_gb:.2f} GB)")
+        if hasattr(self, "lbl_drive_scanned") and self.lbl_drive_scanned:
+            self.lbl_drive_scanned.config(text="Taranan Alan: 0.00 GB (%0.0)", fg="#0084FF")
+            
+        self.lbl_speed_val.config(text="0.00 MB/s")
+        self.lbl_elapsed_val.config(text="00:00")
+        self.lbl_eta_val.config(text="Hesaplanıyor...")
+        
         self.gallery_status_lbl.config(text="Galeri taraması başlatıldı...")
+        if hasattr(self, "update_target_drive_status"):
+            self.update_target_drive_status()
         
         from carver import scan_disk_worker
         for _ in range(worker_count):
