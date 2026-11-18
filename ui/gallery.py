@@ -363,7 +363,7 @@ class GalleryMixin:
 
     def start_gallery_recovery(self):
         if getattr(self, "is_scanning", False):
-            selected_disp = self.gallery_drive_var.get()
+            selected_disp = self.drive_var.get()
             target_drive = self.drives_map.get(selected_disp)
             if target_drive and target_drive == self.active_drive:
                 self.resume_gallery_recovery()
@@ -380,7 +380,7 @@ class GalleryMixin:
                 return
             self.current_session_file = None
             
-        selected_disp = self.gallery_drive_var.get()
+        selected_disp = self.drive_var.get()
         if not selected_disp or selected_disp == "Diskler aranıyor...":
             messagebox.showwarning("Uyarı", "Lütfen kurtarma yapmak istediğiniz diski seçin!")
             return

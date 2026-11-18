@@ -610,9 +610,12 @@ class PreviewMixin:
             except: pass
             self.vid_center_play_btn = None
             
-        if pygame.mixer.get_init():
-            try: pygame.mixer.music.stop()
-            except: pass
+        try:
+            import pygame
+            if pygame.mixer.get_init():
+                pygame.mixer.music.stop()
+        except:
+            pass
             
         if hasattr(self, "active_video_timer") and self.active_video_timer:
             try: self.after_cancel(self.active_video_timer)

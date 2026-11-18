@@ -52,6 +52,7 @@ class RecoveryApp(tk.Tk, DrivesMixin, ScanMixin, PreviewMixin, ExportMixin, Tree
         self.msg_queue = queue.Queue()
         self.has_logged_error = False
         self.active_log_widget = None
+        self.console_logs = []
         
         # Redirect stdout and stderr
         self.redirector = ConsoleRedirector(self)
@@ -295,9 +296,9 @@ class RecoveryApp(tk.Tk, DrivesMixin, ScanMixin, PreviewMixin, ExportMixin, Tree
                         else:
                             default_idx = 0
                         self.gallery_drive_combo.current(default_idx)
-                        self.gallery_drive_var.set(options[default_idx])
+                        self.drive_var.set(options[default_idx])
                         
-                        selected_disp = self.gallery_drive_var.get()
+                        selected_disp = self.drive_var.get()
                         if selected_disp and hasattr(self, "drives_map"):
                             # Update active_drive only if not in loaded session, or if it matches
                             if not getattr(self, "current_session_file", None) or self.drives_map.get(selected_disp) == self.active_drive:
