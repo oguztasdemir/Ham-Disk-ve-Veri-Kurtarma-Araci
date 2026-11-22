@@ -1,5 +1,8 @@
 # 🛠️ NovaRecovery - Professional Data Recovery & File Carver
 
+[![CI Tests](https://github.com/oguztasdemir/Ham-Disk-ve-Veri-Kurtarma-Araci/actions/workflows/ci.yml/badge.svg)](https://github.com/oguztasdemir/Ham-Disk-ve-Veri-Kurtarma-Araci/actions/workflows/ci.yml)
+
+
 NovaRecovery, Windows işletim sistemleri için geliştirilmiş, ham sektör düzeyinde (Raw Sector-level) çalışan, çoklu iş parçacığı (Multi-threading) destekli, yüksek performanslı ve modern bir veri kurtarma ve dosya oymacılığı (File Carving) yazılımıdır. 
 
 Hızlı biçimlendirilmiş (Quick Formatted), dosya yapısı bozulmuş (RAW) veya silinmiş veriler barındıran diskler üzerinde doğrudan sektör okuması yaparak dosya imzalarından (Magic Bytes/Header-Footer) dosyaları kurtarır. Bulunan dosyaları bilgisayara kaydetmeden önce görsel olarak önizlemenize, klasörlemenize ve otomatik olarak hedef diske yedeklemenize olanak tanır.
@@ -114,3 +117,26 @@ Disk Kurtarma/
 ## 📝 Lisans
 
 Bu proje **MIT Lisansı** altında lisanslanmıştır. Eğitim ve veri kurtarma araştırmaları amacıyla geliştirilmiştir. Ticari kullanımlarda disk üzerindeki ham veri yapılarına doğrudan erişim sağlandığından dikkatli olunması önerilir.
+
+
+---
+
+## Ekran Görüntüleri
+
+### Gosterge Paneli Ve Surucu Secimi
+![Gosterge Paneli Ve Surucu Secimi](docs/screenshots/01_gosterge_paneli_ve_surucu_secimi.png)
+
+### Gelismis Tarama Ve Kurtarma Ayarlari
+![Gelismis Tarama Ve Kurtarma Ayarlari](docs/screenshots/05_gelismis_tarama_ve_kurtarma_ayarlari.png)
+
+
+---
+
+## Yerel Testler
+
+Projenin temel çalışma ve sözdizimi doğrulama testlerini çalıştırmak için:
+
+```bash
+pip install pytest
+pytest tests -v
+```
